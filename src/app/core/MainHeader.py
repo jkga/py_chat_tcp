@@ -12,7 +12,7 @@ class MainHeader:
 
         # initial configs
         self.hostname = socket.gethostname()   
-        self.IPAddr = socket.gethostbyname(self.hostname)
+        #self.IPAddr = socket.gethostbyname(self.hostname)
         self.serverName = f"Your Address: {self.hostname}"
         
         # full width header with 4x1 config

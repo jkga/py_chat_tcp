@@ -19,11 +19,6 @@ class App(customtkinter.CTk):
 
         self.protocol("WM_DELETE_WINDOW", self.onAppClose)   
 
-        self.messages = [{
-            "name": 'gfgf',
-            "message" : "fdfdf"
-        }]
-
         # unique ID
         self.currentDateTime = datetime.now().strftime("%d%m%Y%H%M%S")
         self.serverUniqueId = f"{self.currentDateTime}{random.random()}"
@@ -51,11 +46,13 @@ class App(customtkinter.CTk):
         self.socketServer.onStart(callback = partial(self.serverConnectedCallback))
         self.socketServer.onError(callback = partial(self.serverErrorCallback))
         threading.Thread(target=self.socketServer.start).start()
+        self.serverConnectedCallback ()
 
         #mainHeader.onQuit(lambda: os._exit (0))
         #mainHeader.onDisconnect(callback = lambda: os._exit (0))
         #mainHeader.onDisconnect(callback = inputSection.showIpAddressTextInput)
         #inputSection.onConnect(callback = mainHeader.showDisconnectBtn)
+        
     def serverErrorCallback (self, error):
         self.mainHeader.setServerName(text = f"{error}")
 
@@ -73,7 +70,7 @@ class App(customtkinter.CTk):
         if self.socketClient:
             self.inputSection.showMessageTextInput ()
             self.inputSection.bindSendCommand(command = partial(self.sendMessage))
-            self.messageSection.showMessageSection (message = self.messages)
+            self.messageSection.showMessageSection (messages = "")
 
     def clientReceivedCallback (self, **args):
         print("---Running Calllback---")
@@ -86,14 +83,12 @@ class App(customtkinter.CTk):
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
                         self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"])
-                        self.messageSection.messageSection.winfo_y(0)
                 except Exception as e:
                     pass
 
     def sendMessage (self):
         self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
         self.inputSection.setMessageTextInputValue (text = '')
-        # self.messageSection.addMessage ()
     
     def onAppClose (self):
         if self.socketServer : self.socketServer.close()

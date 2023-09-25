@@ -1,22 +1,41 @@
 import socket
-import json
+from _thread import *
 from datetime import datetime
+
+CLIENTS = []
+
+def handleClient (conn, addr):
+  global CLIENTS
+  while True:
+    if conn:
+      message = conn.recv(1024)
+      if message:
+        print(f"SERVER -> RECEIVED: {message.decode()}\n")
+        # broadcast message
+        for client in CLIENTS:
+          client.send(message)
+    else:
+      print('no data from', addr)
+  conn.close()
 
 class SocketServer ():
 
   def __init__ (self):
-   
-    self.host = "127.0.0.1"
+    global CLIENTS
+
+    self.host = ""
     self.port = 5678
     self.onStartCallback = False
     self.onErrorCallback = False
-
+    self.sock = False
+    self.clients = []
+  
   def _startServer (self):
-    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 
     try:
       self.sock.bind((self.host, self.port))
-      self.sock.listen (5)
+      self.sock.listen ()
     except Exception as e:
       if self.onErrorCallback:
         self.onErrorCallback(e)
@@ -25,40 +44,28 @@ class SocketServer ():
     # run callback function
     if self.onStartCallback : self.onStartCallback()
     print("SERVER STARTED")
-
-    # wait for connection
+    
     while True:
       print('waiting for a connection')
       conn, addr = self.sock.accept()
+    
       try:
         print('CONNECTED DEVICE:', addr)
+
         # broadcast to all connected device
-        conn.sendall(f"SERVER -> CONNECTED: {addr}\r\n".encode())
+        conn.send(f"SERVER -> CONNECTED: {addr}\r\n".encode())
+        start_new_thread (handleClient, (conn, addr))
 
-        while True:
-          message = conn.recv(1024)
+        # add to connection pool for sending broadcast messages
+        CLIENTS.append(conn)
 
-          if message:
-            print(f"SERVER -> RECEIVED: {message.decode()}\n")
-
-            # broadcast message
-            mess = {
-              "id" : "s",
-              "message" : f"{message.decode()}"
-            }
-
-            messJson = json.dumps(mess)
-
-            conn.send(message)
-          else:
-            print('no data from', addr)
-            break
       except Exception as e:
         # run callback function
-        if self.onErrorCallback : self.onErrorCallback(e)    
-      finally:
-        # Clean up the connection
-        conn.close()
+        if self.onErrorCallback : self.onErrorCallback(e) 
+        print(e)
+        break
+
+    self.sock.close()
         
 
   def start (self):
@@ -86,8 +93,3 @@ class SocketServer ():
       self.sock.close()
     except Exception as e:
       pass
-
-
-
-#server = SocketServer ()
-#server.start ()

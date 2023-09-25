@@ -4,10 +4,11 @@ import json
 from functools import partial
 from datetime import datetime
 
+
 class SocketClient ():
 
   def __init__ (self):
-    self.host = "127.0.0.1"
+    self.host = ""
     self.port = 5678
     self.sock = socket.socket()
 
@@ -17,6 +18,7 @@ class SocketClient ():
 
     self.connectedCallback = False
     self.connectedCallbackArgs = False
+    self.receivedCallback = False
     self.message = False
   
   def setServerId (self, id):
@@ -25,7 +27,6 @@ class SocketClient ():
 
   def _startClient (self):
     self.sock.connect ((self.host, self.port))
-  
     # callback
     if (self.connectedCallback): self.connectedCallback ()  
 
@@ -34,7 +35,6 @@ class SocketClient ():
         mess = self.sock.recv(1024)
         if mess:
           print(f"CLIENT -> Received from Server: {mess.decode()}\n")
-          print(f"{mess}")
           # callback
           if (self.receivedCallback): self.receivedCallback (message = mess)  
       except Exception as e:
