@@ -108,7 +108,8 @@ class SocketServer ():
 
       __mess = {
         "id": args["id"],
-        "message": f"{args['message']}"
+        "message": f"{args['message']}",
+        "timestamp": f"{args['timestamp']}"
       }
 
       for client in CLIENTS:

@@ -95,6 +95,7 @@ class App(customtkinter.CTk):
         self.messageSection.showMessageSection (messages = "")
         self.inputSection.showMessageTextInput ()
         self.inputSection.bindSendCommand(command = partial(self.broadcastMessage))
+        self.inputSection.inputFrameText.bind('<Return>', command=self.broadcastMessageViaKey)
         return self
 
     def connectAsClient(self):
@@ -111,6 +112,8 @@ class App(customtkinter.CTk):
             self.messageSection.showMessageSection (title=self.inputSection.getMessageTextInputValue())
             self.inputSection.showMessageTextInput ()
             self.inputSection.bindSendCommand(command = partial(self.sendMessage))
+            self.inputSection.inputFrameText.bind('<Return>', command=self.sendMessageViaKey)
+            self.inputSection.inputFrameText.focus()
 
     def clientReceivedCallback (self, **args):
         print("---Running Calllback---")
@@ -131,6 +134,8 @@ class App(customtkinter.CTk):
         if bool(self.inputSection.getMessageTextInputValue ()):
             self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
             self.inputSection.setMessageTextInputValue (text = '')
+            self.inputSection.inputFrameText.bind('<Return>', command=self.sendMessageViaKey)
+            self.inputSection.inputFrameText.focus()
 
     # message function for server connection
     def broadcastMessage (self):
@@ -138,7 +143,14 @@ class App(customtkinter.CTk):
             self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
             self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
             self.inputSection.setMessageTextInputValue (text = '')
+            self.inputSection.inputFrameText.bind('<Return>', command=self.broadcastMessageViaKey)
+            self.inputSection.inputFrameText.focus()
     
+    def broadcastMessageViaKey(self, event):
+        self.broadcastMessage ()
+
+    def sendMessageViaKey(self, event):
+        self.sendMessage ()
     
     def onAppClose (self):
         if self.socketServer : self.socketServer.close()
