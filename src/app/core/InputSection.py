@@ -5,10 +5,10 @@ from functools import partial
 
 class InputSection:
     def __init__(self, **kwargs):
-        
-        self.connectedCallbackParams = False
+
         self.inputFrameText = False
         self.inputFrameSend = False
+        self.connectedCallback = False
 
         # input frame
         self.inputFrame = customtkinter.CTkFrame(master=kwargs["root"], corner_radius=0, height=50, fg_color="#0F1D2E")
@@ -16,6 +16,7 @@ class InputSection:
         self.inputFrame.grid_columnconfigure(0, weight=3)
         self.inputFrame.grid_columnconfigure(1)
         self.inputFrame.grid_rowconfigure(0, weight=1)
+
 
         # show default connect to server field
         # self.showIpAddressTextInput ()
@@ -66,28 +67,11 @@ class InputSection:
       params["root"].configure(state = "disabled")
       params["root"].configure(text = "CONNECTING...")
       
-      # connected after some processing
-      self.connected ()
-      return self
-    
-    def connected (self):
-      # self.showMessageTextInput ()
-
-      # execute callback
-      if(self.connectedCallbackParams):
-        self.connectedCallback(self.connectedCallbackParams)
-      else:
-        self.connectedCallback()
+      # run callback
+      if(self.connectedCallback): self.connectedCallback ()
       return self
     
     # define callback
-    def onConnect (self, **params):
-      if("callback" in params):
-        self.connectedCallback = params["callback"]
-        if("params" in params):
-          self.connectedCallbackParams = params["params"]
-        else:
-          self.connectedCallbackParams = False
-      else:
-        self.connectedCallbackParams = False
+    def onConnect (self, func):
+      self.connectedCallback = func
       return self

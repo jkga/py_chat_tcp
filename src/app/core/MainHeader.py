@@ -53,6 +53,18 @@ class MainHeader:
         self.headerFrameProfileQuitContentIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/shutdown.png")),size=(25, 25))
         self.headerFrameProfileQuitContent = customtkinter.CTkButton(master=self.headerFrameProfileQuit, text=" ", image=self.headerFrameProfileQuitContentIcon, anchor="center", compound="right", fg_color="#373737", corner_radius=0, height=50)
         self.headerFrameProfileQuitContent.grid(row = 0, column=0, sticky="nsew")
+    
+    def showIPBtn (self):
+        # exit Image
+        self.headerFrameProfileQuitContentIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/shutdown.png")),size=(25, 25))
+        self.headerFrameProfileQuitContent = customtkinter.CTkButton(master=self.headerFrameProfileQuit, text="CONNECT TO IP", fg_color="#373737", corner_radius=0, height=50)
+        self.headerFrameProfileQuitContent.grid(row = 0, column=0, sticky="nsew")
+    
+    def showServerBtn (self):
+        # exit Image
+        self.headerFrameProfileQuitContentIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/shutdown.png")),size=(25, 25))
+        self.headerFrameProfileQuitContent = customtkinter.CTkButton(master=self.headerFrameProfileQuit, text="My Room", fg_color="#373737", corner_radius=0, height=50)
+        self.headerFrameProfileQuitContent.grid(row = 0, column=0, sticky="nsew")
 
     def showDisconnectBtn (self, **params):
         # exit Image
@@ -87,6 +99,14 @@ class MainHeader:
         return self
 
     def onQuit (self, func):
+        self.headerFrameProfileQuitContent.configure(command=partial(func))
+        return self
+
+    def onShowIPButton (self, func):
+        self.headerFrameProfileQuitContent.configure(command=partial(func))
+        return self
+
+    def onShowServerButton (self, func):
         self.headerFrameProfileQuitContent.configure(command=partial(func))
         return self
     

@@ -1,16 +1,19 @@
 import socket
+import json
 from _thread import *
 from datetime import datetime
 
 CLIENTS = []
 
-def handleClient (conn, addr):
+def handleClient (conn, addr, onReceiveCallback):
   global CLIENTS
   while True:
     if conn:
       message = conn.recv(1024)
       if message:
         print(f"SERVER -> RECEIVED: {message.decode()}\n")
+        # run callback
+        if onReceiveCallback: onReceiveCallback (message = message)
         # broadcast message
         for client in CLIENTS:
           client.send(message)
@@ -26,6 +29,7 @@ class SocketServer ():
     self.host = ""
     self.port = 5678
     self.onStartCallback = False
+    self.onErrorCallback = False
     self.onErrorCallback = False
     self.sock = False
     self.clients = []
@@ -54,7 +58,7 @@ class SocketServer ():
 
         # broadcast to all connected device
         conn.send(f"SERVER -> CONNECTED: {addr}\r\n".encode())
-        start_new_thread (handleClient, (conn, addr))
+        start_new_thread (handleClient, (conn, addr, self.receivedCallback))
 
         # add to connection pool for sending broadcast messages
         CLIENTS.append(conn)
@@ -66,7 +70,11 @@ class SocketServer ():
         break
 
     self.sock.close()
-        
+
+  def onReceive(self, **args):
+    if "callback" in args:
+      self.receivedCallback = args["callback"]
+    return self      
 
   def start (self):
     self._startServer ()
@@ -93,3 +101,17 @@ class SocketServer ():
       self.sock.close()
     except Exception as e:
       pass
+
+  def sendMessage (self, **args):
+    if "message" in args:
+      print(f"SERVER->broadcasting: {args['message']}")
+
+      __mess = {
+        "id": args["id"],
+        "message": f"{args['message']}"
+      }
+
+      for client in CLIENTS:
+        client.send(f"{json.dumps(__mess)}".encode())
+    return self
+  

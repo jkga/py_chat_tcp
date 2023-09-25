@@ -45,7 +45,9 @@ class App(customtkinter.CTk):
         self.socketServer = SocketServer()
         self.socketServer.onStart(callback = partial(self.serverConnectedCallback))
         self.socketServer.onError(callback = partial(self.serverErrorCallback))
+        self.socketServer.onReceive(callback = partial(self.serverReceiveCallback))
         threading.Thread(target=self.socketServer.start).start()
+
         self.serverConnectedCallback ()
 
         #mainHeader.onQuit(lambda: os._exit (0))
@@ -55,22 +57,57 @@ class App(customtkinter.CTk):
         
     def serverErrorCallback (self, error):
         self.mainHeader.setServerName(text = f"{error}")
+    
+    def serverReceiveCallback (self, **args):
+        print("---Running Server Calllback---")
+        if self.socketServer:
+            mess = args['message'].decode()
+            if mess:
+                try:
+                    print("---Decoding Server Calllback---")
+                    print(mess)
+                    messDecoded = json.loads (mess)
+                    if messDecoded["message"] and messDecoded["id"]:
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"])
+                except Exception as e:
+                    pass
 
     def serverConnectedCallback (self):
+        # show server inputs
         self.mainHeader.setServerName(text = f"SERVER: {self.socketServer.getHostName()}:{self.socketServer.getPort()}")
+        self.toggleIPButton ()
 
+    def toggleServerButton (self):
+        self.inputSection.showIpAddressTextInput ()
+        self.inputSection.onConnect(self.connectAsClient)
+        self.mainHeader.showServerBtn()
+        self.mainHeader.onShowServerButton (self.toggleIPButton)
+        self.messageSection.showEmptyBanner ()
+
+        return self
+
+    def toggleIPButton (self):
+        self.mainHeader.showIPBtn ()
+        self.mainHeader.onShowIPButton (self.toggleServerButton)
+        self.messageSection.showMessageSection (messages = "")
+        self.inputSection.showMessageTextInput ()
+        self.inputSection.bindSendCommand(command = partial(self.broadcastMessage))
+        return self
+
+    def connectAsClient(self):
         # create client
         self.socketClient = SocketClient ()
         self.socketClient.setServerId (self.serverUniqueId)
+        self.socketClient.setHost(self.inputSection.getMessageTextInputValue())
         self.socketClient.onConnect(callback = partial(self.clientConnectedCallback))
         self.socketClient.onReceive(callback = partial(self.clientReceivedCallback))
-        self.socketClientThreadd = threading.Thread(target=self.socketClient.start).start()
+        self.socketClientThread = threading.Thread(target=self.socketClient.start).start()
 
-    def clientConnectedCallback (self, **args):
+    def clientConnectedCallback (self):
         if self.socketClient:
             self.inputSection.showMessageTextInput ()
-            self.inputSection.bindSendCommand(command = partial(self.sendMessage))
             self.messageSection.showMessageSection (messages = "")
+            self.inputSection.bindSendCommand(command = partial(self.sendMessage))
 
     def clientReceivedCallback (self, **args):
         print("---Running Calllback---")
@@ -89,6 +126,12 @@ class App(customtkinter.CTk):
     def sendMessage (self):
         self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
         self.inputSection.setMessageTextInputValue (text = '')
+
+    def broadcastMessage (self):
+        self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId)
+        self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId)
+        self.inputSection.setMessageTextInputValue (text = '')
+    
     
     def onAppClose (self):
         if self.socketServer : self.socketServer.close()

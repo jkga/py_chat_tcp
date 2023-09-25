@@ -24,6 +24,10 @@ class SocketClient ():
   def setServerId (self, id):
     self.serverUniqueId = f"{id}"
     return self
+  
+  def setHost (self, ip):
+    self.host = ip
+    return self
 
   def _startClient (self):
     self.sock.connect ((self.host, self.port))
