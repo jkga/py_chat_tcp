@@ -124,15 +124,19 @@ class App(customtkinter.CTk):
                         self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
                 except Exception as e:
                     pass
-
+                
+    # message function for client connection
     def sendMessage (self):
-        self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
-        self.inputSection.setMessageTextInputValue (text = '')
+        if bool(self.inputSection.getMessageTextInputValue ()):
+            self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
+            self.inputSection.setMessageTextInputValue (text = '')
 
+    # message function for server connection
     def broadcastMessage (self):
-        self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
-        self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
-        self.inputSection.setMessageTextInputValue (text = '')
+        if bool(self.inputSection.getMessageTextInputValue ()):
+            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
+            self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
+            self.inputSection.setMessageTextInputValue (text = '')
     
     
     def onAppClose (self):
