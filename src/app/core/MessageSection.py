@@ -5,6 +5,7 @@ import os
 
 class MessageSection:
     def __init__(self, **kwargs):
+        self.index = 0
         # text frame
         self.contentFrame = customtkinter.CTkFrame(master=kwargs["root"], corner_radius=0, fg_color="transparent")
         self.contentFrame.grid(row=1, column=1, sticky="nsew")
@@ -33,13 +34,19 @@ class MessageSection:
         self.messageSection = customtkinter.CTkScrollableFrame(master=self.contentFrame)
         self.messageSection.grid(row=0, column=0, sticky="nsew")
         label = customtkinter.CTkLabel(master=self.messageSection, text="Messages", text_color="gray")
+
+        if "title" in args:
+            label.configure(text = args["title"])
         label.pack()
+
         return self
     
     def addMessage (self, **args):
+        self.index = self.index + 1
         frame = customtkinter.CTkFrame(master=self.messageSection, corner_radius=0)
         frame.grid_columnconfigure(0, weight=1)
         frame.grid_columnconfigure(1, weight=2)
+        frame.grid_columnconfigure(2, weight=0)
         frame.grid_rowconfigure(0, weight=1)
         
         frameContent = customtkinter.CTkLabel(master=frame, height=50, text="", corner_radius=0, pady=10, justify="right")
@@ -48,11 +55,21 @@ class MessageSection:
         frameContent.grid_rowconfigure(0, weight=1)
 
         frameContentMessage = customtkinter.CTkLabel(master=frameContent, text=f"{args['message']}", text_color="#ffffff", fg_color="gray", corner_radius=10, justify="right")
-        frameContentMessage.grid(row = 0, column = 0, sticky = "e")
+        frameContentMessage.grid(row = 0, column = 1, sticky = "e")
+
+        frameContentMessageSub = customtkinter.CTkLabel(master=frameContent, text="", height=5, text_color="gray", font=('', 9), padx="10")
+        frameContentMessageSub.grid(row = 0, column = 0, sticky = "e")
+
+        if "timestamp" in args: frameContentMessageSub.configure(text=f"{args['timestamp']}")
+
 
         if "id" in args and "senderId" in args:
             if args["id"] == args["senderId"]:
                 frameContentMessage.configure(fg_color="green")
+                # add user icon
+                frameIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/user-default.png")),size=(25, 25))
+                frameIconLabel = customtkinter.CTkLabel(master=frameContent, image=frameIcon, text="", anchor="e", width=40)
+                frameIconLabel.grid(row=0, column=2, sticky="w")
             else:
                 frameContentMessage.configure(fg_color="gray")
 

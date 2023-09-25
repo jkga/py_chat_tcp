@@ -82,6 +82,7 @@ class MainHeader:
     
     def setServerName (self, **args):
         self.headerFrameProfileNameContent.configure(text=args["text"])
+        if "color" in args: self.headerFrameProfileNameContent.configure(text_color=args["color"])
         return self
 
     def disconnect (self, **params):

@@ -56,7 +56,13 @@ class InputSection:
         self.inputFrameSend.grid(row = 0, column = 1, stick = "nsew")
         self.inputFrameSend.configure(command = partial(self.connect, root = self.inputFrameSend))
         return self
-      
+    
+    def setMessageTextInputDisable (self):
+      self.inputFrameText.configure(state = "disabled")
+    
+    def setMessageSendButtonDisable (self):
+      self.inputFrameSend.configure(state = "disabled")
+
     def connect (self, **params):
       self.ipAddress = self.inputFrameText.get()
       # prevent empty address

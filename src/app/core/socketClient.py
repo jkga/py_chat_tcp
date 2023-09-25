@@ -62,7 +62,8 @@ class SocketClient ():
 
       __mess = {
         "id": self.serverUniqueId,
-        "message": f"{args['message']}"
+        "message": f"{args['message']}",
+        "timestamp": f"{datetime.now().strftime('%d %m %Y %H:%M')}"
       }
 
       self.sock.sendall(f"{json.dumps(__mess)}".encode())

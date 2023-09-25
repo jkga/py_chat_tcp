@@ -56,7 +56,9 @@ class App(customtkinter.CTk):
         #inputSection.onConnect(callback = mainHeader.showDisconnectBtn)
         
     def serverErrorCallback (self, error):
-        self.mainHeader.setServerName(text = f"{error}")
+        self.mainHeader.setServerName(text = f"{error}", color = "red")
+        self.inputSection.setMessageTextInputDisable ()
+        self.inputSection.setMessageSendButtonDisable ()
     
     def serverReceiveCallback (self, **args):
         print("---Running Server Calllback---")
@@ -74,7 +76,7 @@ class App(customtkinter.CTk):
 
     def serverConnectedCallback (self):
         # show server inputs
-        self.mainHeader.setServerName(text = f"SERVER: {self.socketServer.getHostName()}:{self.socketServer.getPort()}")
+        self.mainHeader.setServerName(text = f"ROOM: {self.socketServer.getHostName()}:{self.socketServer.getPort()}")
         self.toggleIPButton ()
 
     def toggleServerButton (self):
@@ -105,8 +107,8 @@ class App(customtkinter.CTk):
 
     def clientConnectedCallback (self):
         if self.socketClient:
+            self.messageSection.showMessageSection (title=self.inputSection.getMessageTextInputValue())
             self.inputSection.showMessageTextInput ()
-            self.messageSection.showMessageSection (messages = "")
             self.inputSection.bindSendCommand(command = partial(self.sendMessage))
 
     def clientReceivedCallback (self, **args):
@@ -119,7 +121,7 @@ class App(customtkinter.CTk):
                     print(mess)
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"])
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
                 except Exception as e:
                     pass
 
@@ -128,8 +130,8 @@ class App(customtkinter.CTk):
         self.inputSection.setMessageTextInputValue (text = '')
 
     def broadcastMessage (self):
-        self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId)
-        self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId)
+        self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
+        self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
         self.inputSection.setMessageTextInputValue (text = '')
     
     
