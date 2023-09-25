@@ -17,7 +17,8 @@ class App(customtkinter.CTk):
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
-        self.protocol("WM_DELETE_WINDOW", self.onAppClose)   
+        self.protocol("WM_DELETE_WINDOW", self.onAppClose)  
+        self.bind('<Control-x>', self.onAppCloseViaKey) 
 
         # unique ID
         self.currentDateTime = datetime.now().strftime("%d%m%Y%H%M%S")
@@ -124,7 +125,7 @@ class App(customtkinter.CTk):
                         self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
                 except Exception as e:
                     pass
-                
+
     # message function for client connection
     def sendMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
@@ -143,6 +144,9 @@ class App(customtkinter.CTk):
         if self.socketServer : self.socketServer.close()
         if self.socketClient : self.socketClient.disconnect()
         os._exit (0)
+
+    def onAppCloseViaKey (self, event):
+        self.onAppClose ()
 
 if __name__ == "__main__":
     app = App()
