@@ -11,3 +11,4 @@ The server process runs on your Linux machine that waits for a client to establi
 * python-tk
 * customtkinter
 * Pillow
+* python-dotenv
