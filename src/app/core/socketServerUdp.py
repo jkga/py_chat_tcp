@@ -5,22 +5,6 @@ from datetime import datetime
 
 CLIENTS = []
 
-def handleClient (conn, addr, onReceiveCallback):
-  global CLIENTS
-  while True:
-    if conn:
-      message = conn.recv(1024)
-      if message:
-        print(f"SERVER -> RECEIVED: {message.decode()}\n")
-        # run callback
-        if onReceiveCallback: onReceiveCallback (message = message)
-        # broadcast message
-        for client in CLIENTS:
-          client.send(message)
-    else:
-      print('no data from', addr)
-  conn.close()
-
 class SocketServerUdp ():
 
   def __init__ (self):
@@ -56,8 +40,15 @@ class SocketServerUdp ():
     
       try:
         print('CONNECTED DEVICE:', addr)
-        self.sock.sendto(f"UDP SERVER: You are connected".encode(), addr)
+        if mess:
+          print(f"UDP SERVER -> Received from {addr}: {mess.decode()}\n")
+          self.sock.sendto(mess, addr)
+        else:
+          self.sock.sendto(f"UDP SERVER: You are connected".encode(), addr)
+
         CLIENTS.append(addr)
+
+        if (self.receivedCallback): self.receivedCallback (message = mess)  
       except Exception as e:
         # run callback function
         if self.onErrorCallback : self.onErrorCallback(e) 
@@ -105,7 +96,10 @@ class SocketServerUdp ():
         "timestamp": f"{args['timestamp']}"
       }
 
-      for client in CLIENTS:
+      # get unique client to prevent sending multiple message
+      clientsList = set(CLIENTS)
+
+      for client in clientsList:
         self.sock.sendto(f"{json.dumps(__mess)}".encode(), client)
     return self
   
