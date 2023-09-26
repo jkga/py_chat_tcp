@@ -89,9 +89,14 @@ class SocketServerUdp ():
   def sendMessage (self, **args):
     if "message" in args:
       print(f"SERVER:UDP->broadcasting: {args['message']}")
+      
+      name = ""
+      if "name" in args:
+          name = args['name']
 
       __mess = {
         "id": args["id"],
+        "name": f"{name}",
         "message": f"{args['message']}",
         "timestamp": f"{args['timestamp']}"
       }

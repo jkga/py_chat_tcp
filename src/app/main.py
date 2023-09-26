@@ -12,6 +12,7 @@ from core.socketServer import *
 from core.socketServerUdp import *
 from core.socketClient import *
 from core.socketClientUdp import *
+from core.settingsWindow import *
 
 # global configurations
 # env keys
@@ -22,10 +23,10 @@ load_dotenv(
 CONFIG = dict(dotenv_values())
 CLIENTS = []
 
-
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
         global CONFIG
 
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -33,10 +34,12 @@ class App(customtkinter.CTk):
 
         self.protocol("WM_DELETE_WINDOW", self.onAppClose)  
         self.bind('<Control-x>', self.onAppCloseViaKey) 
+        self.settingsWindow = None
 
         # unique ID
         self.currentDateTime = datetime.now().strftime("%d%m%Y%H%M%S")
         self.serverUniqueId = f"{self.currentDateTime}{random.random()}"
+        self.clientName = ""
         
         # configure window
         self.customTitle = "Chat Application"
@@ -74,7 +77,9 @@ class App(customtkinter.CTk):
         #mainHeader.onDisconnect(callback = lambda: os._exit (0))
         #mainHeader.onDisconnect(callback = inputSection.showIpAddressTextInput)
         #inputSection.onConnect(callback = mainHeader.showDisconnectBtn)
-        
+    def renderClientName (self):
+        self.mainHeader.setServerName(text = f"{self.clientName}: {self.socketServer.getHostName()}:{self.socketServer.getPort()}")
+
     def serverErrorCallback (self, error):
         self.mainHeader.setServerName(text = f"{error}", color = "red")
         self.inputSection.setMessageTextInputDisable ()
@@ -105,12 +110,12 @@ class App(customtkinter.CTk):
         self.mainHeader.showServerBtn()
         self.mainHeader.onShowServerButton (self.toggleIPButton)
         self.messageSection.showEmptyBanner ()
-
         return self
 
     def toggleIPButton (self):
         self.mainHeader.showIPBtn ()
         self.mainHeader.onShowIPButton (self.toggleServerButton)
+        self.mainHeader.onProfilePictureClick (self.openWindow)
         self.messageSection.showMessageSection (messages = "")
         self.inputSection.showMessageTextInput ()
         self.inputSection.bindSendCommand(command = partial(self.broadcastMessage))
@@ -155,7 +160,8 @@ class App(customtkinter.CTk):
     # message function for client connection
     def sendMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
-            self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue ())
+            timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
+            self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.inputSection.setMessageTextInputValue (text = '')
             self.inputSection.inputFrameText.bind('<Return>', command=self.sendMessageViaKey)
             self.inputSection.inputFrameText.focus()
@@ -163,8 +169,9 @@ class App(customtkinter.CTk):
     # message function for server connection
     def broadcastMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
-            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
-            self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
+            timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
+            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp)
+            self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.inputSection.setMessageTextInputValue (text = '')
             self.inputSection.inputFrameText.bind('<Return>', command=self.broadcastMessageViaKey)
             self.inputSection.inputFrameText.focus()
@@ -182,6 +189,12 @@ class App(customtkinter.CTk):
 
     def onAppCloseViaKey (self, event):
         self.onAppClose ()
+    
+    def openWindow(self, event):
+        if self.settingsWindow is None or not self.settingsWindow.winfo_exists():
+            self.settingsWindow = SettingsWindow(self)
+        else:
+            self.settingsWindow.focus()
 
 if __name__ == "__main__":
     app = App()

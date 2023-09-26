@@ -42,7 +42,6 @@ class MessageSection:
         return self
     
     def addMessage (self, **args):
-        self.index = self.index + 1
         frame = customtkinter.CTkFrame(master=self.messageSection, corner_radius=0)
         frame.grid_columnconfigure(0, weight=1)
         frame.grid_columnconfigure(1, weight=2)
@@ -57,11 +56,13 @@ class MessageSection:
         frameContentMessage = customtkinter.CTkLabel(master=frameContent, text=f"{args['message']}", text_color="#ffffff", fg_color="gray", corner_radius=10, justify="right")
         frameContentMessage.grid(row = 0, column = 1, sticky = "e")
 
-        frameContentMessageSub = customtkinter.CTkLabel(master=frameContent, text="", height=5, text_color="gray", font=('', 9), padx="10")
+        frameContentMessageSub = customtkinter.CTkLabel(master=frameContent, text="", padx="10", height=5, font=('', 9), text_color="gray")
         frameContentMessageSub.grid(row = 0, column = 0, sticky = "e")
 
         if "timestamp" in args: frameContentMessageSub.configure(text=f"{args['timestamp']}")
-
+        
+        # add name
+        if "timestamp" in args and "name" in args: frameContentMessageSub.configure(text=f"{args['timestamp']} | {args['name']}")
 
         if "id" in args and "senderId" in args:
             if args["id"] == args["senderId"]:

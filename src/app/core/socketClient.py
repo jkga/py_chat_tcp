@@ -60,10 +60,15 @@ class SocketClient ():
     if "message" in args:
       print(f"CLIENT->sending: {args['message']}")
 
+      name = ""
+      if "name" in args:
+        name = args['name']
+
       __mess = {
         "id": self.serverUniqueId,
+        "name": f"{name}",
         "message": f"{args['message']}",
-        "timestamp": f"{datetime.now().strftime('%d %m %Y %H:%M')}"
+        "timestamp": f"{datetime.now().strftime('%B %d, %Y %I:%M%p')}"
       }
 
       self.sock.sendall(f"{json.dumps(__mess)}".encode())

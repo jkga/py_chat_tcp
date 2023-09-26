@@ -107,6 +107,10 @@ class MainHeader:
         self.headerFrameProfileQuitContent.configure(command=partial(func))
         return self
 
+    def onProfilePictureClick (self, func):
+        self.headerFrameProfileImageContent.bind("<Button-1>", func)
+        return self
+
     def onShowServerButton (self, func):
         self.headerFrameProfileQuitContent.configure(command=partial(func))
         return self
