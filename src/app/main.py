@@ -71,7 +71,7 @@ class App(customtkinter.CTk):
                     print(mess)
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"])
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}")
                 except Exception as e:
                     pass
 
