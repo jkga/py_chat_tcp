@@ -3,16 +3,30 @@ import os
 import threading
 import json
 import random
+from dotenv import dotenv_values, load_dotenv
 from datetime import datetime
 from core.MainHeader import *
 from core.MessageSection import *
 from core.InputSection import *
 from core.socketServer import *
+from core.socketServerUdp import *
 from core.socketClient import *
+from core.socketClientUdp import *
+
+# global configurations
+# env keys
+load_dotenv(
+  dotenv_path = os.path.join(os.path.dirname(__file__),"../.env")
+)
+
+CONFIG = dict(dotenv_values())
+CLIENTS = []
+
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+        global CONFIG
 
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -43,7 +57,12 @@ class App(customtkinter.CTk):
         # show connecting message
         self.mainHeader.setServerName (text = "Connecting . . .")
         self.socketClient = False
-        self.socketServer = SocketServer()
+
+        if CONFIG["CONNECTION_TYPE"] == "TCP":
+            self.socketServer = SocketServer()
+        else:
+           self.socketServer = SocketServerUdp()
+
         self.socketServer.onStart(callback = partial(self.serverConnectedCallback))
         self.socketServer.onError(callback = partial(self.serverErrorCallback))
         self.socketServer.onReceive(callback = partial(self.serverReceiveCallback))
@@ -100,7 +119,11 @@ class App(customtkinter.CTk):
 
     def connectAsClient(self):
         # create client
-        self.socketClient = SocketClient ()
+        if CONFIG["CONNECTION_TYPE"] == "TCP":
+            self.socketClient = SocketClient ()
+        else:
+            self.socketClient = SocketClientUdp ()
+
         self.socketClient.setServerId (self.serverUniqueId)
         self.socketClient.setHost(self.inputSection.getMessageTextInputValue())
         self.socketClient.onConnect(callback = partial(self.clientConnectedCallback))

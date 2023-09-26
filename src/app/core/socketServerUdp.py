@@ -21,13 +21,12 @@ def handleClient (conn, addr, onReceiveCallback):
       print('no data from', addr)
   conn.close()
 
-class SocketServer ():
+class SocketServerUdp ():
 
   def __init__ (self):
     global CLIENTS
-    global CONFIG
 
-    self.host = ""
+    self.host = "0.0.0.0"
     self.port = 5678
     self.onStartCallback = False
     self.onErrorCallback = False
@@ -37,11 +36,10 @@ class SocketServer ():
   
   def _startServer (self):
 
-    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 
     try:
       self.sock.bind((self.host, self.port))
-      self.sock.listen ()
 
     except Exception as e:
       if self.onErrorCallback:
@@ -53,26 +51,18 @@ class SocketServer ():
     print("SERVER STARTED")
     
     while True:
-      print('waiting for a connection')
-      conn, addr = self.sock.accept()
+
+      mess, addr = self.sock.recvfrom(1024)
     
       try:
         print('CONNECTED DEVICE:', addr)
-
-        # broadcast to all connected device
-        conn.send(f"SERVER -> CONNECTED: {addr}\r\n".encode())
-        start_new_thread (handleClient, (conn, addr, self.receivedCallback))
-
-        # add to connection pool for sending broadcast messages
-        CLIENTS.append(conn)
-
+        self.sock.sendto(f"UDP SERVER: You are connected".encode(), addr)
+        CLIENTS.append(addr)
       except Exception as e:
         # run callback function
         if self.onErrorCallback : self.onErrorCallback(e) 
         print(e)
         break
-
-    self.sock.close()
 
   def onReceive(self, **args):
     if "callback" in args:
@@ -107,7 +97,7 @@ class SocketServer ():
 
   def sendMessage (self, **args):
     if "message" in args:
-      print(f"SERVER->broadcasting: {args['message']}")
+      print(f"SERVER:UDP->broadcasting: {args['message']}")
 
       __mess = {
         "id": args["id"],
@@ -116,6 +106,6 @@ class SocketServer ():
       }
 
       for client in CLIENTS:
-        client.send(f"{json.dumps(__mess)}".encode())
+        self.sock.sendto(f"{json.dumps(__mess)}".encode(), client)
     return self
   
