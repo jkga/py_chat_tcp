@@ -3,7 +3,7 @@ import os
 import threading
 import json
 import random
-from dotenv import dotenv_values, load_dotenv
+from dotenv import load_dotenv
 from datetime import datetime
 from core.MainHeader import *
 from core.MessageSection import *
@@ -15,19 +15,14 @@ from core.socketClientUdp import *
 from core.settingsWindow import *
 
 # global configurations
-# env keys
-load_dotenv(
-  dotenv_path = os.path.join(os.path.dirname(__file__),"../.env")
-)
-
-CONFIG = dict(dotenv_values())
+load_dotenv ()
 CLIENTS = []
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
-        global CONFIG
+        #global CONFIG
 
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -39,8 +34,9 @@ class App(customtkinter.CTk):
         # unique ID
         self.currentDateTime = datetime.now().strftime("%d%m%Y%H%M%S")
         self.serverUniqueId = f"{self.currentDateTime}{random.random()}"
+        self.connectionType = os.getenv("CONNECTION_TYPE")
         self.clientName = ""
-        
+
         # configure window
         self.customTitle = "Chat Application"
         self.title(self.customTitle)
@@ -61,7 +57,7 @@ class App(customtkinter.CTk):
         self.mainHeader.setServerName (text = "Connecting . . .")
         self.socketClient = False
 
-        if CONFIG["CONNECTION_TYPE"] == "TCP":
+        if self.connectionType == "TCP":
             self.socketServer = SocketServer()
         else:
            self.socketServer = SocketServerUdp()
@@ -110,6 +106,7 @@ class App(customtkinter.CTk):
         self.mainHeader.showServerBtn()
         self.mainHeader.onShowServerButton (self.toggleIPButton)
         self.messageSection.showEmptyBanner ()
+
         return self
 
     def toggleIPButton (self):
@@ -124,7 +121,7 @@ class App(customtkinter.CTk):
 
     def connectAsClient(self):
         # create client
-        if CONFIG["CONNECTION_TYPE"] == "TCP":
+        if self.connectionType == "TCP":
             self.socketClient = SocketClient ()
         else:
             self.socketClient = SocketClientUdp ()
@@ -153,7 +150,11 @@ class App(customtkinter.CTk):
                     print(mess)
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p"))
+                        timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
+                        name = ""
+                        if messDecoded["timestamp"]: timestamp = messDecoded["timestamp"]
+                        if messDecoded["name"]: name = messDecoded["name"]
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = timestamp, name=name)
                 except Exception as e:
                     pass
 
@@ -170,7 +171,7 @@ class App(customtkinter.CTk):
     def broadcastMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
             timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
-            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp)
+            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.inputSection.setMessageTextInputValue (text = '')
             self.inputSection.inputFrameText.bind('<Return>', command=self.broadcastMessageViaKey)
@@ -199,3 +200,4 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+    input("Press enter to continue...")

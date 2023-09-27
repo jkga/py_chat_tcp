@@ -60,15 +60,14 @@ class MessageSection:
         frameContentMessageSub.grid(row = 0, column = 0, sticky = "e")
 
         if "timestamp" in args: frameContentMessageSub.configure(text=f"{args['timestamp']}")
-        
-        # add name
-        if "timestamp" in args and "name" in args: frameContentMessageSub.configure(text=f"{args['timestamp']} | {args['name']}")
 
         if "id" in args and "senderId" in args:
             if args["id"] == args["senderId"]:
                 frameContentMessage.configure(fg_color="gray")
             else:
-                frameContentMessage.configure(fg_color="green")
+                frameContentMessage.configure(fg_color="green")         
+                # add name
+                if "timestamp" in args and "name" in args: frameContentMessageSub.configure(text=f"{args['timestamp']} | {args['name']}")
                 # add user icon
                 frameIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/user-default.png")),size=(25, 25))
                 frameIconLabel = customtkinter.CTkLabel(master=frameContent, image=frameIcon, text="", anchor="e", width=40)
