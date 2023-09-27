@@ -91,7 +91,9 @@ class App(customtkinter.CTk):
                     print(mess)
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}")
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
+                        # broadcast to all connected clients
+                        self.socketServer.sendMessage(message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
                 except Exception as e:
                     pass
 
@@ -154,7 +156,8 @@ class App(customtkinter.CTk):
                         name = ""
                         if messDecoded["timestamp"]: timestamp = messDecoded["timestamp"]
                         if messDecoded["name"]: name = messDecoded["name"]
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = timestamp, name=name)
+                        if messDecoded["id"] != self.serverUniqueId:
+                            self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = timestamp, name=name)
                 except Exception as e:
                     pass
 
