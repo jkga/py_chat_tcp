@@ -1,4 +1,4 @@
-# Python Chat Application via TCP Socket
+# Python Chat Application via Socket
 This project is for the completion of the `Laboratory Exercise #1` and `Laboratory Exercise #2` for `IT 238 - Network and Client/Server Computing`.   
 
 ![IP Address](./docs/screenshots/messages.png)
@@ -23,12 +23,14 @@ Multiple Client to one Server Chat application using UDP Broadcast
 * Pillow
 * python-dotenv
 
-## Starting the Application via Command Line
-```python
+## Starting the Application via Command Line Interface (CLI)
+```bash
   python3 ./src/app/main.py
 ```
 
 ## Download Executable Package
+Binary package for both `TCP` and `UDP` are included on pre-release builds.
+
 [MacOs v12.4 (Apple Silicon M1)](https://github.com/jkga/py_chat_tcp/releases/tag/0.1)   
 [Ubuntu v22.04LTS](https://github.com/jkga/py_chat_tcp/releases/tag/0.2)
 
@@ -40,8 +42,29 @@ To change the default connection from `TCP` to `UDP`, edit the configuration in 
 Server Options
 > TCP | UDP
 
-## Notes
-- The software supports both `TCP` and `UDP`.
-- A server instance will be automtically created once you run the software, depending on the `CONNECTION_TYPE` specified in  `.env` file
-- It also supports multiple connections
-- The developer used `pyinstaller` to create distributable packages
+## User Interface
+
+### Shifting from Server to Client
+The software can act as a `server` and a `client` simultaneously. 
+
+![shift to client](./docs/screenshots/change-client.gif)
+
+
+### Custom Client/Server Name
+Your name will be visible to all connected clients but will not affect the previous messages
+
+![change name](./docs/screenshots/change-name.gif)
+
+
+## Notice
+- The software supports both `TCP` and `UDP`
+- Built-in server will start automatically once you open the software depending on the `CONNECTION_TYPE` specified in  `.env` file
+- Both connection types support multiple connections
+- You `MUST` wait until the IP address and port is `free` from the previous `TCP` connection, otherwise, you will receive an `address` error
+- You can still use the software as a chat `client` even in the event where the built-in server is not running
+- The developer used the `pyinstaller` module to create distributable packages fo various operating systems
+
+## To Do
+- Make a window option for selecting a connection type `(TCP|UDP)`, instead of setting the configuration from runtime
+- add support for different colors of chat bubbles
+- Add support for choosing an avatar
