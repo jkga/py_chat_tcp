@@ -91,9 +91,9 @@ class App(customtkinter.CTk):
                     print(mess)
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
                         # broadcast to all connected clients
-                        self.socketServer.sendMessage(message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
+                        self.socketServer.sendMessage(message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
                 except Exception as e:
                     pass
 
@@ -174,7 +174,7 @@ class App(customtkinter.CTk):
     def broadcastMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
             timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
-            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
+            self.socketServer.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.messageSection.addMessage (message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.inputSection.setMessageTextInputValue (text = '')
             self.inputSection.inputFrameText.bind('<Return>', command=self.broadcastMessageViaKey)

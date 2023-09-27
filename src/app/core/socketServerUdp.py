@@ -42,7 +42,7 @@ class SocketServerUdp ():
         print('CONNECTED DEVICE:', addr)
         if mess:
           print(f"UDP SERVER -> Received from {addr}: {mess.decode()}\n")
-          self.sock.sendto(mess, addr)
+          #self.sock.sendto(mess, addr)
         else:
           self.sock.sendto(f"UDP SERVER: You are connected".encode(), addr)
 
@@ -89,17 +89,22 @@ class SocketServerUdp ():
   def sendMessage (self, **args):
     if "message" in args:
       print(f"SERVER:UDP->broadcasting: {args['message']}")
-      
+
       name = ""
-      if "name" in args:
-          name = args['name']
+      senderId = ""
+
+      if "name" in args: name = args['name']
+      if "senderId" in args: senderId= args['senderId']
 
       __mess = {
         "id": args["id"],
+        "senderId": senderId,
         "name": f"{name}",
         "message": f"{args['message']}",
         "timestamp": f"{args['timestamp']}"
       }
+
+      print(json.dumps(__mess))
 
       # get unique client to prevent sending multiple message
       clientsList = set(CLIENTS)
