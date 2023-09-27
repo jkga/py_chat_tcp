@@ -156,8 +156,8 @@ class App(customtkinter.CTk):
                         name = ""
                         if messDecoded["timestamp"]: timestamp = messDecoded["timestamp"]
                         if messDecoded["name"]: name = messDecoded["name"]
-                        if messDecoded["id"] != self.serverUniqueId:
-                            self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["id"], timestamp = timestamp, name=name)
+                        #if messDecoded["id"] != self.serverUniqueId:
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = timestamp, name=name)
                 except Exception as e:
                     pass
 
@@ -165,7 +165,7 @@ class App(customtkinter.CTk):
     def sendMessage (self):
         if bool(self.inputSection.getMessageTextInputValue ()):
             timestamp = datetime.now().strftime("%B %d, %Y %I:%M%p")
-            self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
+            self.socketClient.sendMessage(message = self.inputSection.getMessageTextInputValue (), id=self.serverUniqueId, senderId=self.serverUniqueId, timestamp = timestamp, name=self.clientName)
             self.inputSection.setMessageTextInputValue (text = '')
             self.inputSection.inputFrameText.bind('<Return>', command=self.sendMessageViaKey)
             self.inputSection.inputFrameText.focus()

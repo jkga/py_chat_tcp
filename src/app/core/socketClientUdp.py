@@ -67,11 +67,14 @@ class SocketClientUdp ():
       print(f"CLIENT:UDP->sending: {args['message']}")
       
       name = ""
-      if "name" in args:
-          name = args['name']
+      senderId = ""
+
+      if "name" in args: name = args['name']
+      if "senderId" in args: senderId = args['senderId']
 
       __mess = {
         "id": self.serverUniqueId,
+        "senderId": senderId,
         "name": f"{name}",
         "message": f"{args['message']}",
         "timestamp": f"{datetime.now().strftime('%B %d, %Y %I:%M%p')}"
