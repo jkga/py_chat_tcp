@@ -107,18 +107,23 @@ class SocketServer ():
 
   def sendMessage (self, **args):
     if "message" in args:
-      print(f"SERVER->broadcasting: {args['message']}")
+      print(f"TCP SERVER->broadcasting: {args['message']}")
+      
       name = ""
+      senderId = ""
 
-      if "name" in args:
-          name = args['name']
+      if "name" in args: name = args['name']
+      if "senderId" in args: senderId = args['senderId']
 
       __mess = {
         "id": args["id"],
+        "senderId": senderId,
         "name": f"{name}",
         "message": f"{args['message']}",
         "timestamp": f"{args['timestamp']}"
       }
+
+      print(json.dumps(__mess))
 
       for client in CLIENTS:
         client.send(f"{json.dumps(__mess)}".encode())

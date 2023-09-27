@@ -92,8 +92,8 @@ class App(customtkinter.CTk):
                     messDecoded = json.loads (mess)
                     if messDecoded["message"] and messDecoded["id"]:
                         self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
-                        # broadcast to all connected clients
-                        self.socketServer.sendMessage(message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
+                        # broadcast to all connected clients for UDP connection
+                        if self.connectionType == "UDP": self.socketServer.sendMessage(message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = f"{messDecoded['timestamp']}", name=f"{messDecoded['name']}")
                 except Exception as e:
                     pass
 
