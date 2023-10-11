@@ -25,13 +25,14 @@ class ChatWindow(customtkinter.CTkToplevel):
         self.grid_rowconfigure(2, weight=0)
 
         self.rejectCallback = None
-    
-        if "clientName" in kwargs: self.clientName = kwargs["clientName"]
-        if "ipAddress" in kwargs: self.ipAddress = kwargs["ipAddress"]
+
 
     def setClientName (self, name):
         self.clientName = name
         self.title (f"Private Chat Room ({name})")
+    
+    def setIpAddress (self, ip):
+        self.ipAddress = ip
 
     def show (self):
         self.messageSection = ClientMessageSection (root=self)

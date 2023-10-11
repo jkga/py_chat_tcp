@@ -15,7 +15,7 @@ class PyroServer:
 
 
   def register(self, *args, **kwargs):
-
+    print('------regestering--------')
     # show prompt if not exists
     if not kwargs["name"] in self.clients: self.window.openInviteWindow(name = kwargs['name'], onReject = partial(self.onReject, name = kwargs['name']))
     
@@ -34,6 +34,7 @@ class PyroServer:
     print (f"Rejected {name}")
   
   def connect(self, *args, **kwargs):
+    print ('----connected-----')
     return self.register (name = kwargs["name"])
   
   def getPyroAddress (self):

@@ -50,8 +50,9 @@ class InviteWindow(customtkinter.CTkToplevel):
         self.onAppClose ()
 
         # show new chat window
-        chatWindow = ChatWindow(ipAddress = self.ipAddress, clientName = self.clientName)
+        chatWindow = ChatWindow(clientName = self.clientName)
         chatWindow.setClientName(self.clientName)
+        chatWindow.setIpAddress(self.ipAddress)
         threading.Thread(target=chatWindow.show).start()
 
     def closeBox(self):

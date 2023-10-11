@@ -106,7 +106,7 @@ class App(customtkinter.CTk):
             addr = ''
             
             # get IP address of the sender
-            if 'message' in args:
+            if 'address' in args:
                 addr = args['address'][0]
             
             if mess:
@@ -176,6 +176,11 @@ class App(customtkinter.CTk):
         print("---Running Calllback---")
         if self.socketClient:
             mess = args['message'].decode()
+            addr = ''
+
+            # get IP address of the sender
+            if 'address' in args:
+                addr = args['address'][0]
             if mess:
                 try:
                     print("---Decoding Calllback---")
@@ -187,7 +192,7 @@ class App(customtkinter.CTk):
                         if messDecoded["timestamp"]: timestamp = messDecoded["timestamp"]
                         if messDecoded["name"]: name = messDecoded["name"]
                         #if messDecoded["id"] != self.serverUniqueId:
-                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = timestamp, name=name)
+                        self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = timestamp, name=name, ipAddress = addr)
                 except Exception as e:
                     pass
 
