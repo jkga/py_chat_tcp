@@ -24,7 +24,6 @@ class SocketServerUdp ():
 
     try:
       self.sock.bind((self.host, self.port))
-
     except Exception as e:
       if self.onErrorCallback:
         self.onErrorCallback(e)
@@ -32,7 +31,7 @@ class SocketServerUdp ():
 
     # run callback function
     if self.onStartCallback : self.onStartCallback()
-    print("SERVER STARTED")
+    print(f"SERVER STARTED: {socket.gethostbyname(socket.gethostname())}")
     
     while True:
 
@@ -48,7 +47,7 @@ class SocketServerUdp ():
 
         CLIENTS.append(addr)
 
-        if (self.receivedCallback): self.receivedCallback (message = mess)  
+        if (self.receivedCallback): self.receivedCallback (message = mess, address = addr)  
       except Exception as e:
         # run callback function
         if self.onErrorCallback : self.onErrorCallback(e) 
@@ -89,19 +88,21 @@ class SocketServerUdp ():
   def sendMessage (self, **args):
     if "message" in args:
       print(f"SERVER:UDP->broadcasting: {args['message']}")
-
       name = ""
       senderId = ""
+      ipAddress = ""
 
       if "name" in args: name = args['name']
-      if "senderId" in args: senderId= args['senderId']
+      if "senderId" in args: senderId=  args['senderId']
+      if "ipAddress" in args: ipAddress = args['ipAddress']
 
       __mess = {
         "id": args["id"],
         "senderId": senderId,
         "name": f"{name}",
         "message": f"{args['message']}",
-        "timestamp": f"{args['timestamp']}"
+        "timestamp": f"{args['timestamp']}",
+        "ipAddress": f"{ipAddress}"
       }
 
       print(json.dumps(__mess))

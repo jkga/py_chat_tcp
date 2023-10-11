@@ -46,7 +46,7 @@ class SocketClientUdp ():
         if mess:
           print(f"CLIENT -> Received from {addr}: {mess.decode()}\n")
           # callback
-          if (self.receivedCallback): self.receivedCallback (message = mess)  
+          if (self.receivedCallback): self.receivedCallback (message = mess, address = addr)  
       except Exception as e:
         print(f"error: {e}")
 
@@ -68,16 +68,19 @@ class SocketClientUdp ():
       
       name = ""
       senderId = ""
+      ipAddress = ""
 
       if "name" in args: name = args['name']
       if "senderId" in args: senderId = args['senderId']
+      if "ipAddress" in args: ipAddress = args['ipAddress']
 
       __mess = {
         "id": self.serverUniqueId,
         "senderId": senderId,
         "name": f"{name}",
         "message": f"{args['message']}",
-        "timestamp": f"{datetime.now().strftime('%B %d, %Y %I:%M%p')}"
+        "timestamp": f"{datetime.now().strftime('%B %d, %Y %I:%M%p')}",
+        "ipAddress": f"{ipAddress}"
       }
 
       self.sock.sendto(f"{json.dumps(__mess)}".encode(), (self.host, self.port))
