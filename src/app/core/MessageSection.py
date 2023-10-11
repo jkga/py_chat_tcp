@@ -7,9 +7,10 @@ from core.ui.client.InviteWindow import *
 class MessageSection:
     def __init__(self, **kwargs):
         self.index = 0
+        self.root = kwargs["root"]
         self.inviteWindow = None
         # text frame
-        self.contentFrame = customtkinter.CTkFrame(master=kwargs["root"], corner_radius=0, fg_color="transparent")
+        self.contentFrame = customtkinter.CTkFrame(master=self.root, corner_radius=0, fg_color="transparent")
         self.contentFrame.grid(row=1, column=1, sticky="nsew")
 
         self.contentFrame.grid_columnconfigure(0, weight = 1)
@@ -88,6 +89,7 @@ class MessageSection:
 
         if self.inviteWindow is None or not self.inviteWindow.winfo_exists():
             self.inviteWindow = InviteWindow ()
+            self.inviteWindow.setRoot (self.root)
             self.inviteWindow.setClientName (args["name"])
             if "ipAddress" in args: self.inviteWindow.setIpAddress(args["ipAddress"])
             self.inviteWindow.show ()

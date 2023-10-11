@@ -14,7 +14,7 @@ from core.socketServerUdp import *
 from core.socketClient import *
 from core.socketClientUdp import *
 from core.settingsWindow import *
-from core.InvitePrompt import *
+from core.ui.client.InvitePrompt import *
 from core.pyro.PyroServer import *
 
 # global configurations
@@ -235,12 +235,17 @@ class App(customtkinter.CTk):
         else:
             self.settingsWindow.focus()
 
-    def openInviteWindow(self, *args, **kwargs):
+    def openInvitePromptWindow(self, *args, **kwargs):
         self.inviteWindow = InvitePrompt(self)
         self.inviteWindow.setClientName(kwargs["name"])
         if "onReject" in kwargs: self.inviteWindow.onRejectCallback(kwargs["onReject"])
+        if "onMessage" in kwargs: self.inviteWindow.onMessage(self.onMessage)
         self.inviteWindow.show ()
         self.inviteWindow.focus()
+    
+    def onMessage (self, message):
+        print('------message received from pyro------')
+        print(message)
 
 if __name__ == "__main__":
     app = App()

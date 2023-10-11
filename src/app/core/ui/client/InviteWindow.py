@@ -1,6 +1,7 @@
 import customtkinter
 import threading
 from core.ui.client.ChatWindow import *
+from core.pyro.PyroClient import *
 
 class InviteWindow(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -8,6 +9,7 @@ class InviteWindow(customtkinter.CTkToplevel):
         # change default name
         self.clientName = "Anonymous" 
         self.ipAddress = None
+        self.root = None
 
         self.geometry("400x130")
         self.title("Private Chat Invitation")
@@ -19,6 +21,9 @@ class InviteWindow(customtkinter.CTkToplevel):
 
     def setIpAddress (self, ip):
         self.ipAddress = ip
+
+    def setRoot (self, root):
+        self.root = root
     
     def onRejectCallback (self, func):
         self.rejectCallback = func
@@ -48,6 +53,10 @@ class InviteWindow(customtkinter.CTkToplevel):
         
         # close confirmation modal
         self.onAppClose ()
+
+        # connect to pyro server
+        pyro = PyroClient (ipAddress = self.ipAddress, clientName = self.root.clientName)
+        pyro.connect()
 
         # show new chat window
         chatWindow = ChatWindow(clientName = self.clientName)

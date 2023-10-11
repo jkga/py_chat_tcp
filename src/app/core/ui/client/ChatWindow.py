@@ -1,7 +1,6 @@
 import customtkinter
 from core.ui.client.ClientMessageSection import *
 from core.ui.client.ClientInputSection import *
-from core.pyro.PyroClient import *
 
 class ChatWindow(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -13,6 +12,7 @@ class ChatWindow(customtkinter.CTkToplevel):
 
         # change default name
         self.clientName = "Anonymous" 
+        self.ipAddress = ""
 
         self.geometry(f"{500}x{700}")
         self.title("Private Chat Invitation")
@@ -37,9 +37,6 @@ class ChatWindow(customtkinter.CTkToplevel):
     def show (self):
         self.messageSection = ClientMessageSection (root=self)
         self.inputSection = ClientInputSection (root=self)
-
-        pyro = PyroClient (ipAddress = self.ipAddress, clientName = self.clientName)
-        pyro.connect()
     
     def onAppClose (self):
         self.destroy ()

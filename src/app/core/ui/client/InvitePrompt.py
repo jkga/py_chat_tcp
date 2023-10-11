@@ -12,12 +12,16 @@ class InvitePrompt(customtkinter.CTkToplevel):
         self.title("Private Chat Invitation")
         self.protocol("WM_DELETE_WINDOW", self.onAppClose)  
         self.rejectCallback = None
+        self.messageCallback = None
 
     def setClientName (self, name):
         self.clientName = name
     
     def onRejectCallback (self, func):
         self.rejectCallback = func
+    
+    def onMessage (self, func):
+        self.messageCallback = func
 
     def show (self):
 
