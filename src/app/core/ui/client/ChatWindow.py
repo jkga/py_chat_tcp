@@ -12,8 +12,10 @@ class ChatWindow(customtkinter.CTkToplevel):
         self.root = kwargs["root"] 
         # parent pyro instance
         self.pyroInstance = kwargs["pyroInstance"]
-
+        self.isRunningOnServer = False
         self.messageCount  = 0
+
+        if "isRunningOnServer" in kwargs: self.isRunningOnServer = True
 
         # global CONFIG
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -59,7 +61,7 @@ class ChatWindow(customtkinter.CTkToplevel):
         mess = self.inputSection.getMessageTextInputValue ()
 
         # use the current thread and send message to pyro server
-        self.pyroInstance._pyroClaimOwnership() 
+        if hasattr(self.pyroInstance, '_pyroClaimOwnership') : self.pyroInstance._pyroClaimOwnership() 
         
         if bool(mess):
             # disable input field
@@ -74,7 +76,11 @@ class ChatWindow(customtkinter.CTkToplevel):
                     
             try:
                 try:
-                    self.root.pyroInstance.sendMessage(message = json.dumps(payload))
+                    if not self.isRunningOnServer:
+                        # client pyro
+                        self.root.pyroInstance.sendMessage(message = json.dumps(payload))
+                    else:
+                        self.pyroInstance.receiveMessage(message = json.dumps(payload))
                     self.messageSection.addMessage(name = self.clientName, timestamp = f"{timestamp}", id = "", senderId = "", message = f"{mess}")
                     self.inputSection.setMessageTextInputValue (text = '')
                 except Exception as e: pass

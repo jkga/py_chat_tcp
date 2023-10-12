@@ -19,13 +19,20 @@ class CallbackHandler:
     print("-----running callback in client-------")
 
     # show new chat window to the server
-    chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
-    chatWindow.setClientName(self.serverName)
-    chatWindow.show()
+    self.chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
+    self.chatWindow.setClientName(self.serverName)
+    self.chatWindow.show()
 
     # close daemon to allow reusing the address allocation
-    #print("-------closing daemon------")
+    # print("-------closing daemon------")
     # self.daemon.shutdown ()
+
+  @Pyro5.api.expose
+  @Pyro5.api.callback
+  def receiveMessage(self, message):
+    print("-----running callback in client from server-------")
+    print(message)
+    self.chatWindow.receiveMessage(message)
   
   def setPyroInstance (self, pyroObject):
     self.pyroInstance = pyroObject

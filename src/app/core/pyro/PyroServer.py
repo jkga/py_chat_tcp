@@ -51,11 +51,11 @@ class PyroServer:
     print(data)
 
     # show new chat window to the server
-    self.chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
+    self.chatWindow = ChatWindow(root = self, pyroInstance = self.callback, isRunningOnServer = True)
     self.chatWindow.setClientName(data["clientName"])
     self.chatWindow.show()
 
-    # notify client
+    # show chat window to the client
     self.callback._pyroClaimOwnership() 
     self.callback.showChatBox ()
 
