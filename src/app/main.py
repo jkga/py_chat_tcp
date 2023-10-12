@@ -190,6 +190,7 @@ class App(customtkinter.CTk):
                         name = ""
                         if messDecoded["timestamp"]: timestamp = messDecoded["timestamp"]
                         if messDecoded["name"]: name = messDecoded["name"]
+                        if messDecoded["ipAddress"]: addr = messDecoded["ipAddress"]
                         #if messDecoded["id"] != self.serverUniqueId:
                         self.messageSection.addMessage (message = f"{messDecoded['message']}", id=self.serverUniqueId, senderId=messDecoded["senderId"], timestamp = timestamp, name=name, ipAddress = addr)
                 except Exception as e:
