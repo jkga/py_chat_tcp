@@ -9,6 +9,7 @@ class CallbackHandler:
 
   def __init__ (self, *args, **kwargs):
     self.clientName = kwargs["clientName"]
+    self.serverName = kwargs["serverName"]
     self.daemon = kwargs["daemon"]
 
   @Pyro5.api.expose
@@ -17,7 +18,7 @@ class CallbackHandler:
     print("-----running callback in client-------")
     # show new chat window to the server
     chatWindow = ChatWindow(root = self)
-    chatWindow.setClientName(self.clientName)
+    chatWindow.setClientName(self.serverName)
     chatWindow.show()
 
     # close daemon to allow reusing the address allocation
@@ -32,9 +33,11 @@ class PyroClient:
     self.ipAddress = None
     self.server = None
     self.clientName = "anon"
+    self.serverName = "unknown server"
 
     if "ipAddress" in kwargs: self.ipAddress = kwargs["ipAddress"]
     if "clientName" in kwargs: self.clientName = kwargs["clientName"]
+    if "serverName" in kwargs: self.serverName = kwargs["serverName"]
   
   def connect (self):
 
@@ -42,7 +45,7 @@ class PyroClient:
     # otherwise, it yields a connection error
     with Daemon(host=nic.ifaddresses(nic.gateways()['default'][2][1])[nic.AF_INET][0]['addr']) as daemon:
 
-      callback = CallbackHandler (ipAddress = self.ipAddress, clientName = self.clientName, daemon = daemon)
+      callback = CallbackHandler (ipAddress = self.ipAddress, clientName = self.clientName, serverName = self.serverName, daemon = daemon)
       daemon.register(callback)
 
       with Pyro5.api.Proxy(f"PYRO:PyroServer@{self.ipAddress}:5681") as proxy:

@@ -55,7 +55,7 @@ class InviteWindow(customtkinter.CTkToplevel):
         self.onAppClose ()
 
         # connect to pyro server
-        pyro = PyroClient (ipAddress = self.ipAddress, clientName = self.root.clientName)
+        pyro = PyroClient (ipAddress = self.ipAddress, clientName = self.root.clientName, serverName = self.clientName)
         threading.Thread(target=pyro.connect).start()
         
 
