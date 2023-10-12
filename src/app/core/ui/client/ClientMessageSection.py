@@ -62,7 +62,7 @@ class ClientMessageSection:
                 # add name
                 if "timestamp" in args and "name" in args: frameContentMessageSub.configure(text=f"{args['timestamp']} | {args['name']}")
                 # add user icon
-                frameIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/user-default.png")),size=(25, 25))
+                frameIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../../../assets/img/user-default.png")),size=(25, 25))
                 frameIconLabel = customtkinter.CTkLabel(master=frameContent, image=frameIcon, text="", anchor="e", width=40)
                 frameIconLabel.grid(row=0, column=2, sticky="w")
                 

@@ -77,19 +77,31 @@ class ChatWindow(customtkinter.CTkToplevel):
                     self.root.pyroInstance.sendMessage(message = json.dumps(payload))
                     self.messageSection.addMessage(name = self.clientName, timestamp = f"{timestamp}", id = "", senderId = "", message = f"{mess}")
                     self.inputSection.setMessageTextInputValue (text = '')
-                except Exception as e: 
-                    # retry sending if the client received not enought data
-                    # this is a hackish way to resend data from client to server
-                    try:
-                        self.root.pyroInstance.sendMessage(message = json.dumps(payload))
-                        self.messageSection.addMessage(name = self.clientName, timestamp = f"{timestamp}", id = "", senderId = "", message = f"{mess}")
-                        self.inputSection.setMessageTextInputValue (text = '')
-                    except Exception:
-                        pass
+                except Exception as e: pass
                 finally:
                     self.inputSection.setMessageTextInputEnable()
                     self.inputSection.setMessageSendButtonEnable()
             except Exception: pass
+    
+    def receiveMessage (self, message):
+
+        # decode data
+        mess = json.loads(message)
+        message = mess['message']
+        timestamp = mess['timestamp']
+        
+        print("------ showing message to server ui -------")
+        print(message)
+        print("------ end showing message to server ui -------")
+
+
+        # add message count
+        self.messageCount = self.messageCount + 1
+
+        # show message section for the first message
+        if self.messageCount == 1: self.messageSection.showMessageSection ()
+
+        self.messageSection.addMessage(name = self.clientName, timestamp = f"{timestamp}", id = "", senderId = "none", message = f"{message}")
     
     def onAppClose (self):
         self.destroy ()

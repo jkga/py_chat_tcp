@@ -14,6 +14,7 @@ class PyroServer:
     self.onConnect = None
     self.callback = None
     self.pyroInstance = None
+    self.chatWindow = None
 
     if 'window' in kwargs: self.window = kwargs["window"]
 
@@ -50,9 +51,9 @@ class PyroServer:
     print(data)
 
     # show new chat window to the server
-    chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
-    chatWindow.setClientName(data["clientName"])
-    chatWindow.show()
+    self.chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
+    self.chatWindow.setClientName(data["clientName"])
+    self.chatWindow.show()
 
     # notify client
     self.callback._pyroClaimOwnership() 
@@ -62,10 +63,14 @@ class PyroServer:
     print ('----connected-----')
     return self.register (name = kwargs["name"])
 
+  # executed in the server by client's request
   def sendMessage(self, *args, **kwargs):
     mess = kwargs["message"]
-    print (mess)
-    return json.dumps({"message": mess}).encode()
+    self.chatWindow.receiveMessage (message = mess)
+    print("--------Received----------")
+    print(mess)
+    print("-------------------------\n")
+    return mess
   
   def getPyroAddress (self):
     return self.pyroAddress
