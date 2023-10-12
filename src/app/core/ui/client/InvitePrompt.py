@@ -12,7 +12,7 @@ class InvitePrompt(customtkinter.CTkToplevel):
         self.title("Private Chat Invitation")
         self.protocol("WM_DELETE_WINDOW", self.onAppClose)  
         self.rejectCallback = None
-        self.messageCallback = None
+        self.acceptCallback = None
 
     def setClientName (self, name):
         self.clientName = name
@@ -20,8 +20,8 @@ class InvitePrompt(customtkinter.CTkToplevel):
     def onRejectCallback (self, func):
         self.rejectCallback = func
     
-    def onMessage (self, func):
-        self.messageCallback = func
+    def onAcceptCallback (self, func):
+        self.acceptCallback = func
 
     def show (self):
 
@@ -41,16 +41,14 @@ class InvitePrompt(customtkinter.CTkToplevel):
         # reject
         self.submitBtn = customtkinter.CTkButton(master=self.buttonSection, text="REJECT", fg_color="black", hover_color="gray", command=self.closeBox)
         self.submitBtn.grid(row = 0, column = 0, sticky="ew", padx = 10, pady = 10)
+        return self
     
     def createNewChatBox (self):
 
         # close confirmation modal
         self.onAppClose ()
-        
-        # show new chat window
-        chatWindow = ChatWindow()
-        chatWindow.setClientName(self.clientName)
-        threading.Thread(target=chatWindow.show).start()
+
+        if self.acceptCallback: self.acceptCallback ()
 
     def closeBox(self):
         if self.rejectCallback: self.rejectCallback ()

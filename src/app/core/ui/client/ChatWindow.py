@@ -5,6 +5,9 @@ from core.ui.client.ClientInputSection import *
 class ChatWindow(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__()
+        
+        # parent pyro instance
+        self.root = kwargs["root"]
 
         #global CONFIG
         customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -26,7 +29,6 @@ class ChatWindow(customtkinter.CTkToplevel):
 
         self.rejectCallback = None
 
-
     def setClientName (self, name):
         self.clientName = name
         self.title (f"Private Chat Room ({name})")
@@ -37,6 +39,8 @@ class ChatWindow(customtkinter.CTkToplevel):
     def show (self):
         self.messageSection = ClientMessageSection (root=self)
         self.inputSection = ClientInputSection (root=self)
+
+        print(self.root)
     
     def onAppClose (self):
         self.destroy ()

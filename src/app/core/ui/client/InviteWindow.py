@@ -40,14 +40,14 @@ class InviteWindow(customtkinter.CTkToplevel):
         self.buttonSection.pack()
 
         # accept
-        self.submitBtn = customtkinter.CTkButton(master=self.buttonSection, text="SEND", fg_color="green", hover_color="#508617", command=self.createNewChatBox)
+        self.submitBtn = customtkinter.CTkButton(master=self.buttonSection, text="SEND", fg_color="green", hover_color="#508617", command=self.confirmChatBox)
         self.submitBtn.grid(row = 0, column = 1, sticky="ew", padx = 10, pady = 10)
 
         # reject
         self.submitBtn = customtkinter.CTkButton(master=self.buttonSection, text="CANCEL", fg_color="black", hover_color="gray", command=self.closeBox)
         self.submitBtn.grid(row = 0, column = 0, sticky="ew", padx = 10, pady = 10)
     
-    def createNewChatBox (self):
+    def confirmChatBox (self):
         # prevent empty ip
         if not self.ipAddress: return
         
@@ -56,13 +56,19 @@ class InviteWindow(customtkinter.CTkToplevel):
 
         # connect to pyro server
         pyro = PyroClient (ipAddress = self.ipAddress, clientName = self.root.clientName)
-        pyro.connect()
+        threading.Thread(target=pyro.connect).start()
+        
 
+    def createNewChatBox (self):
         # show new chat window
         chatWindow = ChatWindow(clientName = self.clientName)
         chatWindow.setClientName(self.clientName)
         chatWindow.setIpAddress(self.ipAddress)
         threading.Thread(target=chatWindow.show).start()
+    
+    def connectedCallback (self, data):
+        print('----connected cllback here-----')
+        print(data)
 
     def closeBox(self):
         self.destroy ()

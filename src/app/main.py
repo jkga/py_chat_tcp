@@ -81,7 +81,6 @@ class App(customtkinter.CTk):
         pyroServer.onConnect = self.onConnectedPyroCallback
         threading.Thread(target = pyroServer.startServer).start ()
 
-
         #mainHeader.onQuit(lambda: os._exit (0))
         #mainHeader.onDisconnect(callback = lambda: os._exit (0))
         #mainHeader.onDisconnect(callback = inputSection.showIpAddressTextInput)
@@ -239,13 +238,10 @@ class App(customtkinter.CTk):
         self.inviteWindow = InvitePrompt(self)
         self.inviteWindow.setClientName(kwargs["name"])
         if "onReject" in kwargs: self.inviteWindow.onRejectCallback(kwargs["onReject"])
-        if "onMessage" in kwargs: self.inviteWindow.onMessage(self.onMessage)
+        if "onAccept" in kwargs: self.inviteWindow.onAcceptCallback(kwargs["onAccept"])
         self.inviteWindow.show ()
         self.inviteWindow.focus()
     
-    def onMessage (self, message):
-        print('------message received from pyro------')
-        print(message)
 
 if __name__ == "__main__":
     app = App()
