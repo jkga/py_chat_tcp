@@ -3,7 +3,7 @@ import netifaces as nic
 from Pyro5.api import Daemon
 from core.ui.client.ChatWindow import *
 
-Pyro5.api.config.COMMTIMEOUT = 0.5
+# Pyro5.api.config.COMMTIMEOUT = 0.5
 
 class CallbackHandler:
 
@@ -11,19 +11,24 @@ class CallbackHandler:
     self.clientName = kwargs["clientName"]
     self.serverName = kwargs["serverName"]
     self.daemon = kwargs["daemon"]
+    self.pyroInstance = None
 
   @Pyro5.api.expose
   @Pyro5.api.callback
   def showChatBox(self):
     print("-----running callback in client-------")
+
     # show new chat window to the server
-    chatWindow = ChatWindow(root = self)
+    chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
     chatWindow.setClientName(self.serverName)
     chatWindow.show()
 
     # close daemon to allow reusing the address allocation
-    print("-------closing daemon------")
-    self.daemon.shutdown ()
+    #print("-------closing daemon------")
+    # self.daemon.shutdown ()
+  
+  def setPyroInstance (self, pyroObject):
+    self.pyroInstance = pyroObject
 
 
 class PyroClient:
@@ -49,6 +54,7 @@ class PyroClient:
       daemon.register(callback)
 
       with Pyro5.api.Proxy(f"PYRO:PyroServer@{self.ipAddress}:5681") as proxy:
+        callback.setPyroInstance (proxy)
         self.server = proxy
         self.server._pyroOneway.add("run")
         self.server.addCallback (callback)
@@ -56,5 +62,4 @@ class PyroClient:
         print('-------------------PYRO----------------\n')
         print(pyro)
         print('\n----------------------------------------\n')
-      
       daemon.requestLoop ()

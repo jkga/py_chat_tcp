@@ -13,6 +13,7 @@ class PyroServer:
     self.pyroAddress = ''
     self.onConnect = None
     self.callback = None
+    self.pyroInstance = None
 
     if 'window' in kwargs: self.window = kwargs["window"]
 
@@ -49,7 +50,7 @@ class PyroServer:
     print(data)
 
     # show new chat window to the server
-    chatWindow = ChatWindow(root = self)
+    chatWindow = ChatWindow(root = self, pyroInstance = self.pyroInstance)
     chatWindow.setClientName(data["clientName"])
     chatWindow.show()
 
@@ -60,6 +61,11 @@ class PyroServer:
   def run(self, *args, **kwargs):
     print ('----connected-----')
     return self.register (name = kwargs["name"])
+
+  def sendMessage(self, *args, **kwargs):
+    mess = kwargs["message"]
+    print (mess)
+    return json.dumps({"message": mess}).encode()
   
   def getPyroAddress (self):
     return self.pyroAddress
@@ -72,6 +78,7 @@ class PyroServer:
     # Start server and expose the TimeTaggerRPC class
     with Pyro5.api.Daemon(host='', port=5681) as daemon:
         # Register class with Pyro
+        self.pyroInstance = daemon
         addr = daemon.register(self, 'PyroServer')
         self.pyroAddress = addr
         print(addr)

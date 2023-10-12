@@ -5,11 +5,12 @@ from functools import partial
 
 class ClientInputSection:
     def __init__(self, **kwargs):
-
+        
+        self.root = kwargs["root"]
         self.inputFrameText = False
         self.inputFrameSend = False
         self.connectedCallback = False
-        self.clientName = kwargs["root"].clientName
+        self.clientName = self.root.clientName
 
         # input frame
         self.inputFrame = customtkinter.CTkFrame(master=kwargs["root"], corner_radius=0, height=50, fg_color="#0F1D2E")
@@ -52,3 +53,9 @@ class ClientInputSection:
     
     def setMessageSendButtonDisable (self):
       self.inputFrameSend.configure(state = "disabled")
+    
+    def setMessageTextInputEnable (self):
+      self.inputFrameText.configure(state = "normal")
+    
+    def setMessageSendButtonEnable (self):
+      self.inputFrameSend.configure(state = "normal")
