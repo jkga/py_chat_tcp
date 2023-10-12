@@ -1,5 +1,5 @@
 # Python Chat Application via Socket
-This project is for the completion of the `Laboratory Exercise #1` and `Laboratory Exercise #2` for `IT 238 - Network and Client/Server Computing`.   
+This project is for the completion of the `Laboratory Exercise #1`, `Laboratory Exercise #2`, and `Laboratory Exercise #3` for `IT 238 - Network and Client/Server Computing`.   
 
 ![IP Address](./docs/screenshots/messages.png)
 
@@ -15,6 +15,11 @@ Multiple Client to one Server Chat application using UDP Broadcast
 ### Program Description: 
  Extend your simple client-server chat application in `Lab Exer 1` to allow multiple clients to join in the chat (or bulletin board). Clients establish a connection with the server by registering a name. The server receives text message streams from the client and sends a copy of the `message to all other clients by IP broadcast`. All chat screens must be the same for all clients and servers. 
 
+## Exercise #3 
+Multiple Client to one Server Chat Application with private chat using Remote Method Invocation
+
+### Program Description: 
+ Extend your Multiple Client to one Server Chat Application to allow group registration and private chat using `Pyro5 (https://pypi.org/project/Pyro5/)`. Clients register to the server to indicate to everyone that they are available for a private chat. Clients may now `invite other clients` to a private chat session using `RMI` to exchange messages directly. 
 
 ## Dependencies
 * python3
@@ -22,6 +27,7 @@ Multiple Client to one Server Chat application using UDP Broadcast
 * customtkinter
 * Pillow
 * python-dotenv
+* Pyro5
 
 ## Starting the Application via Command Line Interface (CLI)
 ```bash
@@ -31,8 +37,10 @@ Multiple Client to one Server Chat application using UDP Broadcast
 ## Download Executable Package
 Binary package for both `TCP` and `UDP` are included on pre-release builds.
 
-[MacOs v12.4 (Apple Silicon M1)](https://github.com/jkga/py_chat_tcp/releases/tag/0.1)   
-[Ubuntu v22.04LTS](https://github.com/jkga/py_chat_tcp/releases/tag/0.2)
+- [MacOs v12.4 (Apple Silicon M1)](https://github.com/jkga/py_chat_tcp/releases/tag/0.1)   
+- [Ubuntu v22.04LTS](https://github.com/jkga/py_chat_tcp/releases/tag/0.2)   
+- [MacOs v12.4 (Apple Silicon M1) w/ Remote Method Invocation Support](https://github.com/jkga/py_chat_tcp/releases/tag/0.3)   
+- [Ubuntu v22.04LTS w/ Remote Method Invocation Support](https://github.com/jkga/py_chat_tcp/releases/tag/0.4)
 
 ## Network Connection
 To change the default connection from `TCP` to `UDP`, edit the configuration in `.env` file
