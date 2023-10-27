@@ -35,10 +35,18 @@ class MainHeader:
         # name
         self.headerFrameProfileName = customtkinter.CTkFrame(master=self.headerFrame, corner_radius=0, height=50, border_width=0, border_color="#373737")
         self.headerFrameProfileName.grid(row = 0, column=1, sticky="new")
+        self.headerFrameProfileName.grid_columnconfigure(0, weight=1)
+        self.headerFrameProfileName.grid_columnconfigure(1, weight=0)
+        self.headerFrameProfileName.grid_rowconfigure(0, weight=0)
 
         # profile name
         self.headerFrameProfileNameContent = customtkinter.CTkLabel(master=self.headerFrameProfileName, text=self.serverName, pady="17", padx="10", anchor="center")
         self.headerFrameProfileNameContent.grid(row = 0, column=0, sticky="new")
+
+        # store
+        self.headerFrameProfileStoreContentIcon = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../assets/img/store.png")),size=(25, 25))
+        self.headerFrameProfileStoreContent = customtkinter.CTkButton(master=self.headerFrameProfileName, text="STORE", image=self.headerFrameProfileStoreContentIcon, anchor="center", compound="left", fg_color="#333333", corner_radius=0, height=50)
+        self.headerFrameProfileStoreContent.grid(row = 0, column=1, sticky="nsew")
 
         # exit
         self.headerFrameProfileQuit = customtkinter.CTkFrame(master=self.headerFrame, corner_radius=0, height=50, border_width=0, border_color="#373737")
@@ -113,6 +121,10 @@ class MainHeader:
 
     def onShowServerButton (self, func):
         self.headerFrameProfileQuitContent.configure(command=partial(func))
+        return self
+
+    def onShowStoreButton(self, func):
+        self.headerFrameProfileStoreContent.bind("<Button-1>", func)
         return self
     
     def onDisconnect (self, **params):

@@ -15,6 +15,7 @@ from core.socketClient import *
 from core.socketClientUdp import *
 from core.settingsWindow import *
 from core.ui.client.InvitePrompt import *
+from core.ui.client.store.StoreWindow import *
 from core.pyro.PyroServer import *
 
 # global configurations
@@ -33,6 +34,7 @@ class App(customtkinter.CTk):
         self.bind('<Control-x>', self.onAppCloseViaKey) 
         self.settingsWindow = None
         self.inviteWindow = None
+        self.storeWindow = None
 
         # unique ID
         self.currentDateTime = datetime.now().strftime("%d%m%Y%H%M%S")
@@ -60,6 +62,9 @@ class App(customtkinter.CTk):
         # show connecting message
         self.mainHeader.setServerName (text = "Connecting . . .")
         self.socketClient = False
+
+        # show store modal
+        self.mainHeader.onShowStoreButton(self.openStoreWindow)
 
         if self.connectionType == "TCP":
             self.socketServer = SocketServer()
@@ -242,6 +247,12 @@ class App(customtkinter.CTk):
         if "onAccept" in kwargs: self.inviteWindow.onAcceptCallback(kwargs["onAccept"])
         self.inviteWindow.show ()
         self.inviteWindow.focus()
+
+    def openStoreWindow(self, event):
+        if self.storeWindow is None or not self.storeWindow.winfo_exists():
+            self.storeWindow = StoreWindow(self)
+        else:
+            self.storeWindow.focus()
     
 
 if __name__ == "__main__":
