@@ -251,6 +251,7 @@ class App(customtkinter.CTk):
     def openStoreWindow(self, event):
         if self.storeWindow is None or not self.storeWindow.winfo_exists():
             self.storeWindow = StoreWindow(self)
+            self.storeWindow.startBanyanClient ()
         else:
             self.storeWindow.focus()
     

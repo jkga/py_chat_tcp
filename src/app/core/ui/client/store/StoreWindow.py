@@ -1,16 +1,25 @@
 import customtkinter
 import os
+import json
+import threading
 from PIL import Image
+from functools import partial
+from core.banyan.BanyanClient import *
 
 class StoreWindow(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        self.geometry("1024x700")
+  
+        self.geometry("1280x700")
         self.title("Store")
+        self.protocol("WM_DELETE_WINDOW", self.onAppClose) 
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
+        self.banyanClient = None
+        self.storeItemInfoSection = None
+        self.storeContentSection = None
+        self.selectedItemData = {}
 
         # parent frame
         self.mainFrame = customtkinter.CTkFrame(master=self, fg_color="#0F1D2E", corner_radius=0)
@@ -30,6 +39,10 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.storeStatusSection = customtkinter.CTkFrame(master=self.storeSection, fg_color="transparent", corner_radius=0, height=40)
         self.storeStatusSection.grid(row=0, column=0, sticky="nsew")
 
+        self.showContentSection ()
+
+    def showContentSection (self):
+        if self.storeContentSection: self.storeContentSection.destroy()
         self.storeContentSection = customtkinter.CTkScrollableFrame(master=self.storeSection, fg_color="transparent", corner_radius=0)
         self.storeContentSection.grid(row=1, column=0, sticky="nsew")
 
@@ -40,15 +53,17 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.storeSectionHeaderContent.pack()
         self.storeSectionSubHeaderContent = customtkinter.CTkLabel(master=self.storeSectionHeader, text="List of items for bidding", text_color="#ccc", anchor="w", justify="left", font=customtkinter.CTkFont(size=12))
         self.storeSectionSubHeaderContent.pack()
+    
+    def startBanyanClient (self):
 
-        self.addItem ()
-        self.addItem ()
-        self.addItem ()
+        # start banyan client
+        self.banyanClient = BanyanClient ()
+        self.banyanClient.setConnectedCallback (callback = self.banyanConnectedCallback)
+        self.banyanClient.setOnMessageCallback (callback = self.banyanOnMessageCallback)
+        threading.Thread(target = self.banyanClient.start, daemon=True).start ()
 
-
-    def addItem (self):
-              
-
+    def addItem (self, data):
+            
         # item
         item = customtkinter.CTkFrame(master=self.storeContentSection, fg_color="transparent", bg_color="transparent", height=300)
         item.pack(fill="x", padx=50, pady=10)
@@ -72,12 +87,14 @@ class StoreWindow(customtkinter.CTkToplevel):
         itemContentTextSection.grid(row=0, column=1, sticky="nsew")
 
         itemContentTitle = customtkinter.CTkTextbox(master=itemContentTextSection, text_color="white", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="transparent", padx=10, pady=10, height=30)
-        itemContentTitle.insert("0.0", "Lorem ipsum dolor sit amet")
+        itemContentTitle.insert("0.0", data["name"])
         itemContentTitle.configure(state="disabled")
+        itemContentTitle.bind('<Button-1>', partial(self.showInfo, data=data))
         itemContentTitle.grid(row=0, column=0, sticky="new")
 
+
         itemContentDescription = customtkinter.CTkTextbox(master=itemContentTextSection, text_color="white", fg_color="transparent", height=100, padx=10)
-        itemContentDescription.insert("0.0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
+        itemContentDescription.insert("0.0", data["description"])
         itemContentDescription.configure(state="disabled")
         itemContentDescription.grid(row=1, column=0, sticky="new")
 
@@ -97,29 +114,41 @@ class StoreWindow(customtkinter.CTkToplevel):
         itemContentCreatorSection.grid_columnconfigure(1, weight=0)
         itemContentCreatorSection.grid(row=0, column=1, sticky="nsew")
 
-        itemContentCreatorName = customtkinter.CTkLabel(master=itemContentCreatorSection, text_color="white", text="John Hey Doe", anchor="w", compound="top", height=10)
+        itemContentCreatorName = customtkinter.CTkLabel(master=itemContentCreatorSection, text_color="white", text=data["author"], anchor="w", compound="top", height=10)
         itemContentCreatorName.grid(row=0, column=0, sticky="nsew")
 
-        itemContentCreatorTime = customtkinter.CTkLabel(master=itemContentCreatorSection, text_color="white", text="January 01, 2023 3:00PM", font=customtkinter.CTkFont(size=10), anchor="w", compound="top")
+        itemContentCreatorTime = customtkinter.CTkLabel(master=itemContentCreatorSection, text_color="white", text=data["date"], font=customtkinter.CTkFont(size=10), anchor="w", compound="top")
         itemContentCreatorTime.grid(row=1, column=0, sticky="nsew")
 
         # item status btn section
         itemContentStatusSection  = customtkinter.CTkFrame(master=itemContent, width=80, fg_color="transparent")
         itemContentStatusSection.grid(row=0, column=2, sticky="nsew", padx=20, pady=10)
 
-        itemContentStatusSectionLabel = customtkinter.CTkLabel(master=itemContentStatusSection, text="OPEN", fg_color="#217749", corner_radius=10, width=50)
-        itemContentStatusSectionLabel.pack()
+        if data["status"] == 0:
+            itemContentStatusSectionLabel = customtkinter.CTkLabel(master=itemContentStatusSection, text="CLOSED", fg_color="#F82B2B", corner_radius=10, width=100)
+            itemContentStatusSectionLabel.pack()
+        else:
+            itemContentStatusSectionLabel = customtkinter.CTkLabel(master=itemContentStatusSection, text="OPEN", fg_color="#217749", corner_radius=10, width=50)
+            itemContentStatusSectionLabel.pack()
 
-        itemContentStatusSectionBidLabel = customtkinter.CTkLabel(master=itemContentStatusSection, text="115 bids", fg_color="transparent", corner_radius=10, width=50)
+        itemContentStatusSectionBidLabel = customtkinter.CTkLabel(master=itemContentStatusSection, text=f"{data['totalBidCount']} bids", fg_color="transparent", corner_radius=10, width=50)
         itemContentStatusSectionBidLabel.pack()
 
+        #self.showInfoSection ()
+        #self.showInputSection ()
+        #self.addBid ()
+        #self.addBid ()
+    
+    def showInfo (self, event, data):
+        self.selectedItemData = data
         self.showInfoSection ()
         self.showInputSection ()
-        self.addBid ()
-        self.addBid ()
+        for bid in data["bids"]:
+            self.addBid (data = bid)
 
     def showInfoSection (self):
         # store item section
+        if self.storeItemInfoSection: self.storeItemInfoSection.destroy()
         self.storeItemInfoSection = customtkinter.CTkFrame(master=self.mainFrame, fg_color="#182F4A", corner_radius=0, width=300)
         self.storeItemInfoSection.grid_columnconfigure(0, weight=1)
         self.storeItemInfoSection.grid_rowconfigure(0, weight=0)
@@ -146,12 +175,12 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.storeItemInfoSectionHeaderContent.grid(row=0, column=1, sticky="nsew")
 
         self.storeItemInfoSectionHeaderTitle = customtkinter.CTkTextbox(master=self.storeItemInfoSectionHeaderContent, text_color="white", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="transparent", padx=10, pady=10, height=30)
-        self.storeItemInfoSectionHeaderTitle.insert("0.0", "Product Name")
+        self.storeItemInfoSectionHeaderTitle.insert("0.0", self.selectedItemData["name"])
         self.storeItemInfoSectionHeaderTitle.configure(state="disabled")
         self.storeItemInfoSectionHeaderTitle.grid(row=0, column=0, sticky="new")
 
         self.storeItemInfoSectionHeaderDescription = customtkinter.CTkTextbox(master=self.storeItemInfoSectionHeaderContent, text_color="white", fg_color="transparent", height=100, padx=10)
-        self.storeItemInfoSectionHeaderDescription.insert("0.0", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
+        self.storeItemInfoSectionHeaderDescription.insert("0.0", self.selectedItemData["description"])
         self.storeItemInfoSectionHeaderDescription.configure(state="disabled")
         self.storeItemInfoSectionHeaderDescription.grid(row=1, column=0, sticky="new")
 
@@ -172,9 +201,9 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.storeItemInfoSectionHeaderCreatorSection.grid_rowconfigure(1, weight=0)
         self.storeItemInfoSectionHeaderCreatorSection.grid(row=0, column=1, sticky="nsew")
 
-        self.storeItemInfoSectionHeaderCreatorName = customtkinter.CTkLabel(master=self.storeItemInfoSectionHeaderCreatorSection, text_color="white", text="John Hey Doe", anchor="w", compound="top", fg_color="transparent", height=10)
+        self.storeItemInfoSectionHeaderCreatorName = customtkinter.CTkLabel(master=self.storeItemInfoSectionHeaderCreatorSection, text_color="white", text=self.selectedItemData["author"], anchor="w", compound="top", fg_color="transparent", height=10)
         self.storeItemInfoSectionHeaderCreatorName.grid(row=0, column=1, sticky="new")
-        self.storeItemInfoSectionHeaderCreatorTime = customtkinter.CTkLabel(master=self.storeItemInfoSectionHeaderCreatorSection, text_color="white", text="January 01, 2023 3:00PM", font=customtkinter.CTkFont(size=10), anchor="w", compound="top", fg_color="transparent")
+        self.storeItemInfoSectionHeaderCreatorTime = customtkinter.CTkLabel(master=self.storeItemInfoSectionHeaderCreatorSection, text_color="white", text=self.selectedItemData["date"], font=customtkinter.CTkFont(size=10), anchor="w", compound="top", fg_color="transparent")
         self.storeItemInfoSectionHeaderCreatorTime.grid(row=1, column=1, sticky="new")
 
         # bids from users
@@ -197,11 +226,11 @@ class StoreWindow(customtkinter.CTkToplevel):
         # send button image
         self.inputFrameSendImage = customtkinter.CTkImage(dark_image=Image.open(os.path.join(os.path.dirname(__file__),"../../../../assets/img/bag.png")),size=(25, 25))
         # send button
-        self.inputFrameSend = customtkinter.CTkButton(master=self.inputFrame, text=" ", corner_radius=0, border_color="#0F1D2E", image=self.inputFrameSendImage, compound="right", anchor="center")
+        self.inputFrameSend = customtkinter.CTkButton(master=self.inputFrame, text=" ", corner_radius=0, border_color="#0F1D2E", image=self.inputFrameSendImage, compound="right", anchor="center", command=self.sendBid)
         self.inputFrameSend.grid(row = 0, column = 1, stick = "nsew")
 
 
-    def addBid (self):
+    def addBid (self, data):
         item = customtkinter.CTkFrame(master=self.storeItemInfoSectionBody, fg_color="#1C2E42", height=100, corner_radius=25)
         item.grid_rowconfigure(0, weight=0)
         item.grid_columnconfigure(0, weight=0)
@@ -214,11 +243,13 @@ class StoreWindow(customtkinter.CTkToplevel):
         itemAmountSection.grid_rowconfigure(1, weight=0)
         itemAmountSection.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
-        itemAmount = customtkinter.CTkLabel(master=itemAmountSection, text="PHP 3,000.00", fg_color="transparent", text_color="#A19C22")
+        itemAmount = customtkinter.CTkLabel(master=itemAmountSection, text=data["amount"], fg_color="transparent", text_color="#A19C22")
         itemAmount.grid(row=0, column=0, sticky="nsew")
 
         itemAmountAwardButton = customtkinter.CTkButton(master=itemAmountSection, text="AWARD", fg_color="#217749", corner_radius=10, width=50)
-        itemAmountAwardButton.grid(row=1, column=0, sticky="nsew")
+        
+        if data["amount"]:
+            itemAmountAwardButton.grid(row=1, column=0, sticky="nsew")
 
         # user
         itemHeaderCreator = customtkinter.CTkFrame(master=item, fg_color="transparent")
@@ -237,9 +268,65 @@ class StoreWindow(customtkinter.CTkToplevel):
         itemHeaderCreatorSection.grid_rowconfigure(1, weight=0)
         itemHeaderCreatorSection.grid(row=0, column=0, sticky="nsew")
 
-        itemHeaderCreatorSectionHeaderCreatorName = customtkinter.CTkLabel(master=itemHeaderCreatorSection, text_color="white", text="John Hey Doe", anchor="e", compound="top", fg_color="transparent", height=10)
+        itemHeaderCreatorSectionHeaderCreatorName = customtkinter.CTkLabel(master=itemHeaderCreatorSection, text_color="white", text=data["author"], anchor="e", compound="top", fg_color="transparent", height=10)
         itemHeaderCreatorSectionHeaderCreatorName.grid(row=0, column=0, sticky="new")
 
-        itemHeaderCreatorSectionHeaderCreatorTime = customtkinter.CTkLabel(master=itemHeaderCreatorSection, text_color="white", text="January 01, 2023 3:00PM", font=customtkinter.CTkFont(size=10), anchor="e", compound="top", fg_color="transparent")
+        itemHeaderCreatorSectionHeaderCreatorTime = customtkinter.CTkLabel(master=itemHeaderCreatorSection, text_color="white", text=data['date'], font=customtkinter.CTkFont(size=10), anchor="e", compound="top", fg_color="transparent")
         itemHeaderCreatorSectionHeaderCreatorTime.grid(row=1, column=0, sticky="new")
-       
+
+    def sendBid (self):
+        self.inputFrameSend.configure(state='disabled')
+        self.inputFrameText.configure(state='disabled')
+
+        _payload = {
+            "id": self.selectedItemData["id"],
+            "author": self.master.clientName,
+            "amount": f"PHP {self.inputFrameText.get()}"
+        }
+        
+        print("sending . . .") 
+
+        if bool(self.inputFrameText.get()):
+            self.banyanClient.send('bid', json.dumps(_payload))
+        
+        # enable button
+        self.inputFrameSend.configure(state='normal')
+        self.inputFrameText.configure(state='normal')
+ 
+
+    def banyanConnectedCallback (self, payload):
+        print('Running connected callback')
+    
+    def banyanOnMessageCallback (self, topic, payload):
+        print('Receiving Messages')
+        payload = json.loads(payload)
+
+        if topic == 'biddingResponse':
+            if not "data" in payload: return
+
+            # re render ui
+            try:
+                self.showContentSection ()
+            except Exception as e:
+                print(e)
+
+            for data in payload['data']:
+
+                try:
+                    self.addItem (data = data)
+                except Exception as e:
+                    print(e)
+                
+                # auto select item
+                if "id" in self.selectedItemData:
+                    # reload info section for selected item
+                    if self.selectedItemData["id"] == data['id']:
+                        self.showInfo(event = None, data=data)
+
+            
+            return self
+
+    def onAppClose (self):
+        self.banyanClient.stop()
+        self.focus ()
+        self.destroy ()
