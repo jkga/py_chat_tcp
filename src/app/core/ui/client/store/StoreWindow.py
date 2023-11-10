@@ -33,11 +33,35 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.storeSection.grid_columnconfigure(0, weight=1)
         self.storeSection.grid_rowconfigure(0, weight=0)
         self.storeSection.grid_rowconfigure(1, weight=1)
+        self.storeSection.grid_rowconfigure(2, weight=0)
         self.storeSection.grid(row=0, column=0, sticky="nsew")
 
         # item section status
         self.storeStatusSection = customtkinter.CTkFrame(master=self.storeSection, fg_color="transparent", corner_radius=0, height=40)
-        self.storeStatusSection.grid(row=0, column=0, sticky="nsew")
+        self.storeStatusSection.grid(row=2, column=0, sticky="nsew")
+
+        # input section
+        self.storeInputSection = customtkinter.CTkFrame(master=self.storeSection, fg_color="transparent", corner_radius=0, height=40)
+        self.storeInputSection.columnconfigure(0,weight=1)
+        self.storeInputSection.rowconfigure(0, weight=1)
+        self.storeInputSection.rowconfigure(1, weight=1)
+        self.storeInputSection.rowconfigure(2, weight=0)
+        self.storeInputSection.grid(row=2, column=0, sticky="new")
+
+        self.storeInputSectionName = customtkinter.CTkEntry(master=self.storeInputSection, height=50, corner_radius=0, fg_color="#142C4A", text_color="#CCCCCC", placeholder_text="Enter Product Name", placeholder_text_color="gray", border_color="#0F1D2E")
+        self.storeInputSectionName.grid(row=0, column=0, sticky="new")
+
+        self.storeInputSectionDescriptionFrame = customtkinter.CTkFrame(master=self.storeInputSection, fg_color="transparent", corner_radius=0)
+        self.storeInputSectionDescriptionFrame.grid_rowconfigure(0, weight=1)
+        self.storeInputSectionDescriptionFrame.grid_columnconfigure(0, weight=2)
+        self.storeInputSectionDescriptionFrame.grid_columnconfigure(1, weight=0)
+        self.storeInputSectionDescriptionFrame.grid(row=1, column=0, sticky="new")
+
+        self.storeInputSectionDescription = customtkinter.CTkEntry(master=self.storeInputSectionDescriptionFrame, height=50, corner_radius=0, fg_color="#142C4A", text_color="#CCCCCC", placeholder_text="Short Description", placeholder_text_color="gray", border_color="#0F1D2E")
+        self.storeInputSectionDescription.grid(row=0, column=0, sticky="new")
+
+        self.storeInputSectionButton = customtkinter.CTkButton(master=self.storeInputSectionDescriptionFrame, height=50, corner_radius=0, fg_color="green", text_color="white", text="POST ITEM", command=self.sendBiddingRequest)
+        self.storeInputSectionButton.grid(row=0, column=1, sticky="new")
 
         self.showContentSection ()
 
@@ -279,12 +303,12 @@ class StoreWindow(customtkinter.CTkToplevel):
         self.inputFrameText.configure(state='disabled')
 
         _payload = {
-            "id": self.selectedItemData["id"],
+            "biddingRequestId": self.selectedItemData["id"],
             "author": self.master.clientName,
             "amount": f"PHP {self.inputFrameText.get()}"
         }
-        
-        print("sending . . .") 
+        print(_payload)
+        print("sending input bid. . .") 
 
         if bool(self.inputFrameText.get()):
             self.banyanClient.send('bid', json.dumps(_payload))
@@ -292,7 +316,32 @@ class StoreWindow(customtkinter.CTkToplevel):
         # enable button
         self.inputFrameSend.configure(state='normal')
         self.inputFrameText.configure(state='normal')
- 
+    
+    def sendBiddingRequest(self):
+        self.storeInputSectionButton.configure(state='disabled') 
+        self.storeInputSectionName.configure(state='disabled')
+        self.storeInputSectionDescription.configure(state='disabled')
+
+        _payload = {
+            "author": self.master.clientName,
+            "name": f"{self.storeInputSectionName.get()}",
+            "description": f"{self.storeInputSectionDescription.get()}"
+        }
+        
+        print(_payload)
+        print("sending") 
+
+        if bool(self.storeInputSectionName.get()):
+            self.banyanClient.send('biddingRequest', json.dumps(_payload))
+        
+        # enable button
+        self.storeInputSectionButton.configure(state='normal')
+        self.storeInputSectionName.configure(state='normal')
+        self.storeInputSectionDescription.configure(state='normal')
+        self.storeInputSectionName.delete("0", "end")
+        self.storeInputSectionDescription.delete("0", "end")
+        self.storeInputSectionName.focus()
+    
 
     def banyanConnectedCallback (self, payload):
         print('Running connected callback')

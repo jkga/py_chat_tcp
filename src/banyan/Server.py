@@ -15,6 +15,9 @@ class EchoServer(BanyanBase):
         self.set_subscriber_topic('bidding')
         self.set_subscriber_topic('bid')
 
+        self.startId = 1
+        self.startBidId = 1
+
         self.bidding = {
             'total': 1,
             'data': [{
@@ -52,27 +55,76 @@ class EchoServer(BanyanBase):
         if(topic == 'bidding'):
             self.publish_payload(json.dumps(self.bidding), 'biddingResponse')
             print('Sending Bidding Data')
-
-        if(topic == 'bid'):
+        
+        if(topic == 'biddingRequest'):
             try:
                 __data = json.loads(payload)
 
-                if not "id" in __data: return
+                __description = ''
+                if not "name" in __data: return
+                if not "author" in __data: return
+                if not "description" in __data: __description = ''
 
-                for bidding in self.bidding["data"]:
+                
 
-                    if not bidding["id"] == __data["id"]: return
+                self.startId = self.startId + 1
+                __id = self.startId
 
-                    # add bid to list
-                    __date = datetime.now().strftime('%B %d, %Y %I:%M%p')
-                    __data["date"] = __date,
-                    __data["status"] = 0
-                    bidding["bids"].insert(0,__data)
-                    bidding["totalBidCount"] = bidding["totalBidCount"] + 1
+                # add new item
+                __data["id"] = __id
+                __data["date"] = datetime.now().strftime('%B %d, %Y %I:%M%p')
+                __data["status"] = 1
+                __data['totalBidCount'] = 0
+
+                __data['bids'] = [
+                    {
+                        'id': 1,
+                        'biddingRequestId': __id,
+                        'amount': '',
+                        'status': 0,
+                        'date': datetime.now().strftime('%B %d, %Y %I:%M%p'),
+                        'author': 'Welcome to the bidding section!'
+                    }
+                ]
+
+                self.bidding["total"] = self.bidding["total"] + 1
+                self.bidding["data"].insert(0,__data)
                     
                 self.publish_payload(json.dumps(self.bidding), 'biddingResponse')
                 print('Received a bid from client')
+      
+            except Exception as e:
+                print(e)
 
+        if(topic == 'bid'):
+
+            try:
+                __data = json.loads(payload)
+                print(__data)
+
+                if not "biddingRequestId" in __data: return
+
+                for bidding in self.bidding["data"]:
+
+                    if bidding["id"] == __data["biddingRequestId"]:
+                        print('-------')
+                        print(bidding)
+                        
+                        #self.startBidId  = self.startBidId + 1
+
+                        __bidId = 2
+
+                        # add bid to list
+                        __date = datetime.now().strftime('%B %d, %Y %I:%M%p')
+                        __data["id"] = __bidId
+                        __data["date"] = __date,
+                        __data["status"] = 0
+                        bidding["bids"].insert(0,__data)
+                        bidding["totalBidCount"] = bidding["totalBidCount"] + 1
+                        
+                self.publish_payload(json.dumps(self.bidding), 'biddingResponse')
+                print('Received a bid from client')
+      
             except Exception as e:
                 print(e)
 
